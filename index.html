@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+<html lang="en">
 <head>
 <link rel="icon" type="image/png" href="./favicon.png">
   </head>
@@ -93,6 +94,84 @@
 
     body.theme-sunset .game-card:hover {
       background-color: rgba(32, 21, 52, 0.92);
+    }
+
+    /* Beach Mode Background */
+    body.theme-beach .top-bar {
+      background-color: rgba(8, 47, 73, 0.92);
+      border-bottom-color: rgba(56, 189, 248, 0.28);
+    }
+
+    body.theme-beach .sidebar {
+      background-color: rgba(12, 58, 86, 0.88);
+      border-right-color: rgba(56, 189, 248, 0.24);
+    }
+
+    body.theme-beach .app-shell {
+      background:
+        radial-gradient(circle at 82% 16%, rgba(253, 224, 71, 0.45) 0%, transparent 32%),
+        radial-gradient(circle at 50% 62%, rgba(45, 212, 191, 0.32) 0%, transparent 55%),
+        linear-gradient(
+          180deg,
+          #0284c7 0%,
+          #0ea5e9 34%,
+          #14b8a6 66%,
+          #5eead4 80%,
+          #fde68a 91%,
+          #f59e0b 100%
+        );
+    }
+
+    body.theme-beach .hero-card,
+    body.theme-beach .game-card,
+    body.theme-beach .panel-box {
+      background-color: rgba(10, 32, 52, 0.84);
+      backdrop-filter: blur(10px);
+      border-color: rgba(94, 234, 212, 0.26);
+    }
+
+    body.theme-beach .game-card:hover {
+      background-color: rgba(14, 46, 72, 0.92);
+    }
+
+    /* Live FPS Badge */
+    .fps-badge {
+      position: fixed;
+      top: 56px;
+      right: 16px;
+      z-index: 45;
+      background-color: rgba(17, 18, 21, 0.88);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 99px;
+      font-family: monospace;
+      pointer-events: none;
+      display: none;
+    }
+
+    .fps-badge.visible {
+      display: block;
+    }
+
+    .accent-swatch {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+
+    .accent-swatch:hover {
+      transform: scale(1.12);
+    }
+
+    .accent-swatch.active {
+      border-color: #ffffff;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
     }
 
     /* Top Window Bar */
@@ -916,15 +995,19 @@
         <path d="M18 6L6 18M6 6l12 12"/>
       </svg>
     </button>
+    <div class="app-title" id="topBarAppTitle">ALL STAR ARCADE</div>
 
-    <div class="app-title">ALL STAR ARCADE</div>
-
-    <div class="traffic-lights" aria-hidden="true">
-      <span class="traffic-dot" style="background-color:#ff5f56;"></span>
-      <span class="traffic-dot" style="background-color:#ffbd2e;"></span>
-      <span class="traffic-dot" style="background-color:#27c93f;"></span>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span id="topBarPlayerBadge" style="font-size:11px; font-weight:800; color:var(--accent); background:rgba(255,255,255,0.06); padding:3px 9px; border-radius:99px;">PLAYER 1</span>
+      <div class="traffic-lights" aria-hidden="true">
+        <span class="traffic-dot" style="background-color:#ff5f56;"></span>
+        <span class="traffic-dot" style="background-color:#ffbd2e;"></span>
+        <span class="traffic-dot" style="background-color:#27c93f;"></span>
+      </div>
     </div>
   </header>
+
+  <div id="liveFpsBadge" class="fps-badge">60 FPS</div>
 
   <!-- MAIN SHELL -->
   <div class="app-shell">
@@ -1255,10 +1338,32 @@
 
           <!-- APPEARANCE & ENGINE SETTINGS -->
           <div class="panel-box">
+            <div class="setting-row" style="background:rgba(250, 204, 21, 0.06);">
+              <div>
+                <div style="font-size:15px; font-weight:800; color:var(--accent);">📲 Download Launcher as an App</div>
+                <div id="installAppStatusText" style="font-size:12px; color:#9ca3af; margin-top:2px;">Install ALL STAR ARCADE as a standalone desktop/mobile app or download an offline HTML launcher</div>
+              </div>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <button id="pwaInstallBtn" type="button" class="play-btn play-btn-sm" onclick="triggerInstallApp()">⬇ Install App</button>
+                <button type="button" class="secondary-btn-sm" onclick="downloadStandaloneLauncherHtml()">💾 Download Offline App (.html)</button>
+              </div>
+            </div>
+
+            <div class="setting-row">
+              <div>
+                <div style="font-size:14px; font-weight:700;">Player Profile &amp; Gamertag</div>
+                <div style="font-size:12px; color:#9ca3af; margin-top:2px;">Customize your arcade name displayed in the top bar</div>
+              </div>
+              <div style="display:flex; gap:6px; align-items:center;">
+                <input id="playerTagInput" type="text" class="text-input" style="width:160px;" maxlength="20" placeholder="PLAYER 1" />
+                <button type="button" class="play-btn play-btn-sm" onclick="savePlayerTag()">Save</button>
+              </div>
+            </div>
+
             <div class="setting-row">
               <div>
                 <div style="font-size:14px; font-weight:700;">Appearance &amp; Background Mode</div>
-                <div style="font-size:12px; color:#9ca3af; margin-top:2px;">Switch between obsidian Dark Mode or twilight Sunset Mode</div>
+                <div style="font-size:12px; color:#9ca3af; margin-top:2px;">Switch between obsidian Dark Mode, twilight Sunset Mode, or tropical Beach Mode</div>
               </div>
               <div class="theme-switcher">
                 <button id="themeBtnDark" type="button" class="theme-choice-btn active" onclick="setBackgroundTheme('dark')">
@@ -1269,6 +1374,23 @@
                   <span style="width:10px; height:10px; border-radius:50%; background:linear-gradient(135deg,#ea580c,#db2777,#4c1d95);"></span>
                   <span>Sunset Mode</span>
                 </button>
+                <button id="themeBtnBeach" type="button" class="theme-choice-btn" onclick="setBackgroundTheme('beach')">
+                  <span style="width:10px; height:10px; border-radius:50%; background:linear-gradient(135deg,#0284c7,#14b8a6,#fde047);"></span>
+                  <span>Beach Mode</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="setting-row">
+              <div>
+                <div style="font-size:14px; font-weight:700;">Launcher Accent Color</div>
+                <div style="font-size:12px; color:#9ca3af; margin-top:2px;">Personalize buttons, active tabs, and glowing borders</div>
+              </div>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <button type="button" class="accent-swatch active" data-accent="yellow" style="background:#facc15;" title="All-Star Yellow" onclick="setAccentPalette('yellow')"></button>
+                <button type="button" class="accent-swatch" data-accent="cyan" style="background:#22d3ee;" title="Ocean Cyan" onclick="setAccentPalette('cyan')"></button>
+                <button type="button" class="accent-swatch" data-accent="emerald" style="background:#34d399;" title="Emerald Mint" onclick="setAccentPalette('emerald')"></button>
+                <button type="button" class="accent-swatch" data-accent="coral" style="background:#fb7185;" title="Sunset Coral" onclick="setAccentPalette('coral')"></button>
               </div>
             </div>
 
@@ -1298,8 +1420,28 @@
 
             <div class="setting-row">
               <div>
-                <div style="font-size:14px; font-weight:700;">Featured Card Yellow Glow</div>
-                <div style="font-size:12px; color:#9ca3af; margin-top:2px;">Ambient yellow border glow on SUPER HOOPZ 2.0</div>
+                <div style="font-size:14px; font-weight:700;">Auto-Full Screen on Game Launch</div>
+                <div style="font-size:12px; color:#9ca3af; margin-top:2px;">Automatically expand games to Full Screen when you click PLAY</div>
+              </div>
+              <button id="autoFsToggleBtn" type="button" class="toggle-switch off" onclick="toggleAutoFullscreen()">
+                <span class="toggle-knob"></span>
+              </button>
+            </div>
+
+            <div class="setting-row">
+              <div>
+                <div style="font-size:14px; font-weight:700;">Live FPS Performance Counter</div>
+                <div style="font-size:12px; color:#9ca3af; margin-top:2px;">Display a real-time frame rate overlay in the top-right corner</div>
+              </div>
+              <button id="fpsToggleBtn" type="button" class="toggle-switch off" onclick="toggleFpsOverlay()">
+                <span class="toggle-knob"></span>
+              </button>
+            </div>
+
+            <div class="setting-row">
+              <div>
+                <div style="font-size:14px; font-weight:700;">Featured Card Glow</div>
+                <div style="font-size:12px; color:#9ca3af; margin-top:2px;">Ambient border glow on SUPER HOOPZ 2.0</div>
               </div>
               <button id="glowToggleBtn" type="button" class="toggle-switch" onclick="toggleGlow()">
                 <span class="toggle-knob"></span>
@@ -1613,6 +1755,10 @@
     const THEME_KEY = 'allstar_arcade_theme_v3';
     const ENGINE_KEY = 'allstar_arcade_engine_v3';
     const STAGE_KEY = 'allstar_arcade_stage_v3';
+    const ACCENT_KEY = 'allstar_arcade_accent_v1';
+    const PLAYERTAG_KEY = 'allstar_arcade_playertag_v1';
+    const AUTOFS_KEY = 'allstar_arcade_autofs_v1';
+    const FPS_KEY = 'allstar_arcade_fps_v1';
 
     function getDefaultSaveData() {
       return {
@@ -1672,6 +1818,11 @@
     }
 
     let currentTheme = safeStorage.get(THEME_KEY, 'dark');
+    let currentAccent = safeStorage.get(ACCENT_KEY, 'yellow');
+    let playerTag = safeStorage.get(PLAYERTAG_KEY, 'PLAYER 1');
+    let autoFullscreen = safeStorage.get(AUTOFS_KEY, 'false') === 'true';
+    let showFpsCounter = safeStorage.get(FPS_KEY, 'false') === 'true';
+    let deferredInstallPrompt = null;
     let defaultEngine = safeStorage.get(ENGINE_KEY, 'turbowarp');
     let defaultStage = safeStorage.get(STAGE_KEY, '640x480');
     let currentFilter = 'all';
@@ -1802,24 +1953,168 @@
       showToast('Returned to ALL STAR ARCADE Home');
     });
 
-    // Background Theme (Dark Mode vs Sunset Mode)
+    // PWA App Manifest & Install Handler
+    (function setupAppInstallSupport() {
+      try {
+        const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="40" fill="#111215"/><circle cx="96" cy="96" r="62" fill="#facc15"/><text x="96" y="114" font-size="64" font-weight="900" font-family="sans-serif" text-anchor="middle" fill="#111215">★</text></svg>`;
+        const iconUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(iconSvg);
+        const manifest = {
+          name: 'ALL STAR ARCADE',
+          short_name: 'AllStarArcade',
+          start_url: '.',
+          display: 'standalone',
+          background_color: '#0d0e11',
+          theme_color: '#facc15',
+          icons: [{ src: iconUrl, sizes: '192x192', type: 'image/svg+xml' }]
+        };
+        const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+        const link = document.createElement('link');
+        link.rel = 'manifest';
+        link.href = URL.createObjectURL(manifestBlob);
+        document.head.appendChild(link);
+      } catch (e) {
+        // Ignore in restricted iframes
+      }
+
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredInstallPrompt = e;
+        const status = document.getElementById('installAppStatusText');
+        if (status) {
+          status.textContent = '✓ Ready to install directly onto your device as a standalone app!';
+        }
+      });
+    })();
+
+    async function triggerInstallApp() {
+      if (deferredInstallPrompt) {
+        deferredInstallPrompt.prompt();
+        const choice = await deferredInstallPrompt.userChoice;
+        deferredInstallPrompt = null;
+        if (choice && choice.outcome === 'accepted') {
+          showToast('ALL STAR ARCADE installed!');
+          return;
+        }
+      }
+      // Fallback: download standalone self-contained app launcher file
+      downloadStandaloneLauncherHtml();
+    }
+
+    function downloadStandaloneLauncherHtml() {
+      const htmlContent = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'ALL-STAR-ARCADE-App.html';
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      showToast('Downloaded ALL-STAR-ARCADE-App.html! Open it anytime or pin to desktop.');
+    }
+
+    function savePlayerTag() {
+      const input = document.getElementById('playerTagInput');
+      const val = (input ? input.value : '').trim().toUpperCase() || 'PLAYER 1';
+      playerTag = val;
+      safeStorage.set(PLAYERTAG_KEY, playerTag);
+      const badge = document.getElementById('topBarPlayerBadge');
+      if (badge) badge.textContent = playerTag;
+      playBeep(620, 0.06);
+      showToast('Gamertag updated to ' + playerTag);
+    }
+
+    // Background Theme (Dark Mode, Sunset Mode, Beach Mode)
     function setBackgroundTheme(theme, silent) {
-      currentTheme = theme === 'sunset' ? 'sunset' : 'dark';
+      const validThemes = ['dark', 'sunset', 'beach'];
+      currentTheme = validThemes.includes(theme) ? theme : 'dark';
       safeStorage.set(THEME_KEY, currentTheme);
 
       document.body.classList.toggle('theme-sunset', currentTheme === 'sunset');
+      document.body.classList.toggle('theme-beach', currentTheme === 'beach');
 
       const darkBtn = document.getElementById('themeBtnDark');
       const sunsetBtn = document.getElementById('themeBtnSunset');
-      if (darkBtn && sunsetBtn) {
-        darkBtn.classList.toggle('active', currentTheme === 'dark');
-        sunsetBtn.classList.toggle('active', currentTheme === 'sunset');
-      }
+      const beachBtn = document.getElementById('themeBtnBeach');
+      if (darkBtn) darkBtn.classList.toggle('active', currentTheme === 'dark');
+      if (sunsetBtn) sunsetBtn.classList.toggle('active', currentTheme === 'sunset');
+      if (beachBtn) beachBtn.classList.toggle('active', currentTheme === 'beach');
 
       if (!silent) {
-        playBeep(currentTheme === 'sunset' ? 620 : 460, 0.07);
-        showToast(currentTheme === 'sunset' ? 'Sunset Mode activated' : 'Dark Mode activated');
+        playBeep(currentTheme === 'beach' ? 680 : (currentTheme === 'sunset' ? 620 : 460), 0.07);
+        const label = currentTheme === 'beach' ? 'Beach Mode activated' : (currentTheme === 'sunset' ? 'Sunset Mode activated' : 'Dark Mode activated');
+        showToast(label);
       }
+    }
+
+    const accentPalettes = {
+      yellow: { accent: '#facc15', dark: '#eab308', light: '#fde047', text: '#111215' },
+      cyan: { accent: '#22d3ee', dark: '#06b6d4', light: '#67e8f9', text: '#082f49' },
+      emerald: { accent: '#34d399', dark: '#10b981', light: '#6ee7b7', text: '#064e3b' },
+      coral: { accent: '#fb7185', dark: '#f43f5e', light: '#fda4af', text: '#111215' }
+    };
+
+    function setAccentPalette(name, silent) {
+      const pal = accentPalettes[name] ? name : 'yellow';
+      currentAccent = pal;
+      safeStorage.set(ACCENT_KEY, pal);
+      const colors = accentPalettes[pal];
+      const root = document.documentElement.style;
+      root.setProperty('--accent', colors.accent);
+      root.setProperty('--accent-dark', colors.dark);
+      root.setProperty('--accent-light', colors.light);
+      root.setProperty('--accent-text', colors.text);
+
+      document.querySelectorAll('.accent-swatch').forEach((btn) => {
+        btn.classList.toggle('active', btn.getAttribute('data-accent') === pal);
+      });
+
+      if (!silent) {
+        playBeep(640, 0.06);
+        showToast('Accent color set to ' + pal.toUpperCase());
+      }
+    }
+
+    function toggleAutoFullscreen() {
+      autoFullscreen = !autoFullscreen;
+      safeStorage.set(AUTOFS_KEY, String(autoFullscreen));
+      const btn = document.getElementById('autoFsToggleBtn');
+      if (btn) btn.classList.toggle('off', !autoFullscreen);
+      playBeep(autoFullscreen ? 620 : 420, 0.06);
+      showToast(autoFullscreen ? 'Auto-Full Screen enabled' : 'Auto-Full Screen disabled');
+    }
+
+    let fpsLoopRunning = false;
+    function toggleFpsOverlay() {
+      showFpsCounter = !showFpsCounter;
+      safeStorage.set(FPS_KEY, String(showFpsCounter));
+      const btn = document.getElementById('fpsToggleBtn');
+      const badge = document.getElementById('liveFpsBadge');
+      if (btn) btn.classList.toggle('off', !showFpsCounter);
+      if (badge) badge.classList.toggle('visible', showFpsCounter);
+      if (showFpsCounter && !fpsLoopRunning) startFpsCounterLoop();
+      playBeep(showFpsCounter ? 660 : 420, 0.06);
+    }
+
+    function startFpsCounterLoop() {
+      fpsLoopRunning = true;
+      let frames = 0;
+      let lastTime = performance.now();
+      function tick(now) {
+        if (!showFpsCounter) {
+          fpsLoopRunning = false;
+          return;
+        }
+        frames++;
+        if (now - lastTime >= 500) {
+          const fps = Math.round((frames * 1000) / (now - lastTime));
+          const badge = document.getElementById('liveFpsBadge');
+          if (badge) badge.textContent = `${fps} FPS`;
+          frames = 0;
+          lastTime = now;
+        }
+        requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
     }
 
     function updateDefaultStage(val) {
@@ -1850,7 +2145,196 @@
       if (soundEnabled) playBeep(640, 0.06);
     }
 
-    // Settings Save Summary & Backup Export/Import
+    // Navigation Switcher (Fixed ReferenceError)
+    function switchView(viewName) {
+      document.querySelectorAll('.view-section').forEach((sec) => sec.classList.remove('active'));
+      const target = document.getElementById('view-' + viewName);
+      if (target) target.classList.add('active');
+
+      document.querySelectorAll('.nav-btn').forEach((btn) => {
+        btn.classList.toggle('active', btn.getAttribute('data-nav') === viewName);
+      });
+
+      if (viewName === 'games') {
+        renderLibrary();
+      } else if (viewName === 'settings') {
+        renderSettingsSaveSummary();
+      }
+    }
+
+    function openScratchHub() {
+      switchView('games');
+      setLibraryFilter('scratch');
+    }
+
+    // Modal & Game Launch Helpers
+    function openGameModal(gameId) {
+      loadGameModal(gameId);
+    }
+
+    async function loadGameModal(gameId) {
+      cleanupActiveGame();
+
+      const game = getAllGames().find((g) => g.id === gameId) || builtInGames[0];
+      activeModalGame = game;
+
+      const [defW, defH] = defaultStage.split('x').map(Number);
+      activeStageW = game.stageW || defW || 640;
+      activeStageH = game.stageH || defH || 480;
+
+      document.getElementById('modalGameTitle').textContent = game.title;
+      document.getElementById('modalPrivateTag').style.display = game.isPrivateSb3 ? 'inline-block' : 'none';
+      document.getElementById('modalScaffoldingControls').style.display = game.isPrivateSb3 ? 'flex' : 'none';
+      document.getElementById('modalSaveStatus').textContent = '● Saved';
+
+      const switchWrap = document.getElementById('modalEngineSwitch');
+      const bodyEl = document.getElementById('modalBody');
+      switchWrap.innerHTML = '';
+
+      if (game.id === 'super-hoopz') {
+        const hs = gameSaves.hoopz;
+        bodyEl.innerHTML = `
+          ${buildStageToolbarHtml(activeStageW, activeStageH)}
+          <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px; font-size:12px;">
+            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+              <span style="color:#9ca3af;">Ball Skin:</span>
+              <button type="button" class="size-pill ${hs.selectedSkin === 'classic' ? 'active' : ''}" id="skinBtnClassic" onclick="selectHoopSkin('classic')">Classic</button>
+              <button type="button" class="size-pill ${hs.selectedSkin === 'gold' ? 'active' : ''}" id="skinBtnGold" onclick="selectHoopSkin('gold')">
+                ${hs.unlockedSkins.includes('gold') ? 'Gold Star' : '🔒 Gold (5 Baskets)'}
+              </button>
+              <button type="button" class="size-pill ${hs.selectedSkin === 'neon' ? 'active' : ''}" id="skinBtnNeon" onclick="selectHoopSkin('neon')">
+                ${hs.unlockedSkins.includes('neon') ? 'Neon Cyber' : '🔒 Neon (15 Baskets)'}
+              </button>
+            </div>
+            <div style="display:flex; gap:12px; font-weight:800;">
+              <span style="color:#9ca3af;">STREAK: <span id="hoopStreak" style="color:#fff;">0</span></span>
+              <span style="color:#9ca3af;">BEST: <span id="hoopBest" style="color:#fde047;">${hs.highScore}</span></span>
+              <span style="color:#facc15;">SCORE: <span id="hoopScore">0</span></span>
+            </div>
+          </div>
+          <div class="stage-outer-wrap">
+            <div id="activeStageBox" class="stage-frame-box" style="width:${activeStageW}px; height:${activeStageH}px;">
+              <canvas id="gameCanvas" style="width:100%; height:100%; display:block; cursor:crosshair;"></canvas>
+            </div>
+          </div>
+        `;
+        document.getElementById('gameModal').classList.add('open');
+        startHoopMiniGame(activeStageW, activeStageH);
+      } else if (game.id === 'battlefront-3') {
+        const bf = gameSaves.battlefront;
+        bodyEl.innerHTML = `
+          ${buildStageToolbarHtml(activeStageW, activeStageH)}
+          <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px; font-size:12px;">
+            <span style="color:#9ca3af;">Move: <strong>←/→ or Mouse</strong> • Fire Laser: <strong>Space or Click</strong></span>
+            <div style="display:flex; gap:12px; font-weight:800;">
+              <span style="color:#60a5fa;">WAVE: <span id="bfWave">${bf.highestWave}</span></span>
+              <span style="color:#9ca3af;">HIGH: <span id="bfHigh" style="color:#fde047;">${bf.highScore}</span></span>
+              <span style="color:#facc15;">SCORE: <span id="bfScore">0</span></span>
+            </div>
+          </div>
+          <div class="stage-outer-wrap">
+            <div id="activeStageBox" class="stage-frame-box" style="width:${activeStageW}px; height:${activeStageH}px;">
+              <canvas id="gameCanvas" style="width:100%; height:100%; display:block; cursor:crosshair;"></canvas>
+            </div>
+          </div>
+        `;
+        document.getElementById('gameModal').classList.add('open');
+        startBattlefrontMiniGame(activeStageW, activeStageH);
+      } else if (game.id === 'fnaf-2026') {
+        const fn = gameSaves.fnaf;
+        bodyEl.innerHTML = `
+          ${buildStageToolbarHtml(activeStageW, activeStageH)}
+          <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px; font-size:12px;">
+            <span style="color:#9ca3af;">Click <strong>LEFT DOOR</strong>, <strong>RIGHT DOOR</strong>, or <strong>FLASHLIGHT</strong> to block animatronics until 6 AM!</span>
+            <div style="display:flex; gap:12px; font-weight:800;">
+              <span style="color:#a78bfa;">NIGHT: <span id="fnafNight">${fn.currentNight}</span></span>
+              <span style="color:#4ade80;">POWER: <span id="fnafPower">100</span>%</span>
+              <span style="color:#facc15;">TIME: <span id="fnafClock">12 AM</span></span>
+            </div>
+          </div>
+          <div class="stage-outer-wrap">
+            <div id="activeStageBox" class="stage-frame-box" style="width:${activeStageW}px; height:${activeStageH}px;">
+              <canvas id="gameCanvas" style="width:100%; height:100%; display:block; cursor:pointer;"></canvas>
+            </div>
+          </div>
+        `;
+        document.getElementById('gameModal').classList.add('open');
+        startFnafMiniGame(activeStageW, activeStageH);
+      } else if (game.isPrivateSb3) {
+        const stored = await sb3Vault.getFile(game.id);
+        bodyEl.innerHTML = `
+          ${buildStageToolbarHtml(activeStageW, activeStageH)}
+          <div class="stage-outer-wrap">
+            <div id="activeStageBox" class="stage-frame-box" style="width:${activeStageW}px; height:${activeStageH}px;">
+              <div id="scaffoldingMount" style="width:100%; height:100%; min-width:0; min-height:0; overflow:hidden; display:flex; align-items:center; justify-content:center; color:#fde047; font-size:13px; font-weight:700;">
+                Loading Scratch VM &amp; your .sb3 file...
+              </div>
+            </div>
+          </div>
+          <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; margin-top:10px; font-size:11px; color:#9ca3af;">
+            <span>🔒 Private Local File: <strong style="color:#fde047;">${escapeHtml(game.fileName || 'project.sb3')}</strong> • Cloud variables (☁) auto-save locally</span>
+            <div style="display:flex; gap:6px;">
+              ${stored ? `<button type="button" class="size-pill" onclick="downloadPrivateSb3('${game.id}')">⬇ Export .sb3</button>` : ''}
+            </div>
+          </div>
+        `;
+        document.getElementById('gameModal').classList.add('open');
+
+        if (stored && stored.buffer) {
+          await mountLocalSb3Scaffolding(game.id, stored.buffer, activeStageW, activeStageH, game.extensionUrls || []);
+        } else {
+          const mount = document.getElementById('scaffoldingMount');
+          if (mount) {
+            mount.innerHTML = `<div style="padding:20px; text-align:center; color:#f87171;">Local .sb3 binary data was not found. Please re-upload your .sb3 file.</div>`;
+          }
+        }
+      } else if (game.isScratch) {
+        const activeEngine = game.engine || defaultEngine;
+        switchWrap.innerHTML = `
+          <button type="button" class="modal-close-btn" style="${activeEngine === 'turbowarp' ? 'background:#facc15;color:#111214;' : ''}" onclick="switchEmbedEngine('${game.id}', 'turbowarp')">TurboWarp</button>
+          <button type="button" class="modal-close-btn" style="${activeEngine === 'scratch' ? 'background:#facc15;color:#111214;' : ''}" onclick="switchEmbedEngine('${game.id}', 'scratch')">Scratch</button>
+        `;
+        const playerSize = getPlayerFrameSize(activeStageW, activeStageH, activeEngine);
+        bodyEl.innerHTML = `
+          ${buildStageToolbarHtml(activeStageW, activeStageH)}
+          <div class="stage-outer-wrap">
+            <div id="activeStageBox" class="stage-frame-box" style="width:${playerSize.width}px; height:${playerSize.height}px;">
+              <iframe
+                id="scratchStageFrame"
+                title="${escapeHtml(game.title)}"
+                src="${getScratchEmbedUrl(game.scratchId, activeEngine, game.extensionUrls || [])}"
+                width="${playerSize.width}"
+                height="${playerSize.height}"
+                allowtransparency="true"
+                frameborder="0"
+                scrolling="no"
+                allowfullscreen
+                referrerpolicy="strict-origin-when-cross-origin"
+                style="width:${playerSize.width}px; height:${playerSize.height}px; border:0; display:block; color-scheme:auto;"
+              ></iframe>
+            </div>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; font-size:11px; color:#9ca3af;">
+            <span>Scratch Project ID: <strong style="color:#fff;">${escapeHtml(game.scratchId)}</strong> • Cloud variables (☁) &amp; Save Codes persist locally</span>
+            <a href="https://scratch.mit.edu/projects/${encodeURIComponent(game.scratchId)}/" target="_blank" rel="noopener noreferrer" style="color:#facc15; text-decoration:none; font-weight:700;">Open on Scratch ↗</a>
+          </div>
+        `;
+        document.getElementById('gameModal').classList.add('open');
+      }
+
+      if (autoFullscreen) {
+        setTimeout(() => {
+          const card = document.getElementById('theaterModalCard');
+          if (card && !document.fullscreenElement && !card.classList.contains('pseudo-fullscreen')) {
+            toggleTheaterFullscreen();
+          }
+        }, 60);
+      }
+
+      playBeep(520, 0.08);
+    }
+
+    // Settings Summary & Backup Export/Import
     function renderSettingsSaveSummary() {
       const container = document.getElementById('settingsSaveSummaryList');
       if (!container) return;
@@ -2056,19 +2540,25 @@
       pendingSb3File = null;
       pendingJsExtensionText = '';
       pendingJsExtensionName = '';
-      document.getElementById('sb3FileInput').value = '';
-      document.getElementById('sb3FileLabel').textContent = 'Supports Scratch 3.0 (.sb3) & Scratch 2.0 (.sb2) files';
-      document.getElementById('sb3TitleInput').value = '';
+      const sb3Input = document.getElementById('sb3FileInput');
+      if (sb3Input) sb3Input.value = '';
+      const sb3Label = document.getElementById('sb3FileLabel');
+      if (sb3Label) sb3Label.textContent = 'Supports Scratch 3.0 (.sb3) & Scratch 2.0 (.sb2) files';
+      const sb3Title = document.getElementById('sb3TitleInput');
+      if (sb3Title) sb3Title.value = '';
       const sb3ExtensionInput = document.getElementById('sb3ExtensionUrls');
       if (sb3ExtensionInput) sb3ExtensionInput.value = '';
-      const jsInput = document.getElementById('sb3JsFileInput');
-      if (jsInput) jsInput.value = '';
-      const jsLabel = document.getElementById('sb3JsFileLabel');
-      if (jsLabel) jsLabel.textContent = 'No local .js file attached';
+      const jsFileInput = document.getElementById('sb3JsFileInput');
+      if (jsFileInput) jsFileInput.value = '';
+      const jsFileLabel = document.getElementById('sb3JsFileLabel');
+      if (jsFileLabel) jsFileLabel.textContent = 'No local .js file attached';
 
-      document.getElementById('scratchUrlInput').value = '';
-      document.getElementById('scratchTitleInput').value = '';
-      document.getElementById('scratchEngineInput').value = defaultEngine;
+      const urlInput = document.getElementById('scratchUrlInput');
+      if (urlInput) urlInput.value = '';
+      const titleInput = document.getElementById('scratchTitleInput');
+      if (titleInput) titleInput.value = '';
+      const engineInput = document.getElementById('scratchEngineInput');
+      if (engineInput) engineInput.value = defaultEngine;
       previewExtractedId('');
 
       const [dw, dh] = defaultStage.split('x');
@@ -2102,15 +2592,14 @@
     }
 
     function appendPresetExtension(url) {
-      const box = document.getElementById('sb3ExtensionUrls');
-      if (!box) return;
-      const current = box.value.trim();
-      if (current.includes(url)) {
-        showToast('Extension already added');
-        return;
+      const ta = document.getElementById('sb3ExtensionUrls');
+      if (!ta) return;
+      const lines = ta.value.split('\n').map((s) => s.trim()).filter(Boolean);
+      if (!lines.includes(url)) {
+        lines.push(url);
+        ta.value = lines.join('\n');
       }
-      box.value = current ? `${current}\n${url}` : url;
-      playBeep(580, 0.05);
+      playBeep(620, 0.05);
     }
 
     function handleJsExtensionFileChosen(input) {
@@ -2121,59 +2610,42 @@
         pendingJsExtensionText = String(reader.result || '');
         pendingJsExtensionName = file.name;
         const lbl = document.getElementById('sb3JsFileLabel');
-        if (lbl) {
-          lbl.textContent = `✓ Attached: ${file.name}`;
-          lbl.style.color = '#fde047';
-        }
-        showToast(`Attached ${file.name}`);
+        if (lbl) lbl.textContent = `✓ Attached: ${file.name}`;
+        showToast('Attached extension: ' + file.name);
       };
       reader.readAsText(file);
     }
 
     function normalizeExtensionUrl(rawUrl) {
-      let cleaned = String(rawUrl || '').trim();
-      // Auto-convert standard GitHub blob links into raw.githubusercontent.com JS links
-      const ghBlobMatch = cleaned.match(/^https?:\/\/github\.com\/([^/]+)\/([^/]+)\/blob\/(.+)$/i);
-      if (ghBlobMatch) {
-        cleaned = `https://raw.githubusercontent.com/${ghBlobMatch[1]}/${ghBlobMatch[2]}/${ghBlobMatch[3]}`;
+      let trimmed = String(rawUrl || '').trim();
+      const ghMatch = trimmed.match(/^https?:\/\/github\.com\/([^/]+)\/([^/]+)\/blob\/(.+)$/i);
+      if (ghMatch) {
+        trimmed = `https://raw.githubusercontent.com/${ghMatch[1]}/${ghMatch[2]}/${ghMatch[3]}`;
       }
-      try {
-        const u = new URL(cleaned);
-        if (u.protocol === 'https:' || u.protocol === 'blob:' || (u.protocol === 'http:' && u.hostname === 'localhost')) {
-          return u.href;
-        }
-      } catch (e) {
-        return null;
-      }
-      return null;
+      return trimmed;
     }
 
-    function parseTurboWarpExtensionEntries(rawText) {
+    function parseTurboWarpExtensions(rawText, extraJsCode) {
+      const sources = [];
       const text = String(rawText || '').trim();
-      const urls = [];
-      const inlineScripts = [];
-
-      if (!text) {
-        return { urls, inlineScripts };
-      }
-
-      // Detect if the user pasted raw JavaScript extension source code directly
-      const looksLikeRawJs = /(?:Scratch\.extensions\.register|class\s+\w+|function\s*\(|=>\s*\{|getInfo\s*\(\s*\))/.test(text)
-        && !/^https?:\/\//i.test(text);
-
-      if (looksLikeRawJs) {
-        inlineScripts.push({ name: 'pasted-extension.js', code: text });
-        return { urls, inlineScripts };
-      }
-
-      text.split(/[\n,]+/).forEach((line) => {
-        const normalized = normalizeExtensionUrl(line);
-        if (normalized) {
-          urls.push(normalized);
+      if (text) {
+        const lines = text.split('\n').map((l) => l.trim()).filter(Boolean);
+        const allUrls = lines.every((l) => /^https?:\/\//i.test(l));
+        if (allUrls) {
+          lines.forEach((l) => sources.push({ type: 'url', value: normalizeExtensionUrl(l) }));
+        } else {
+          const urlLines = lines.filter((l) => /^https?:\/\//i.test(l));
+          const codeLines = lines.filter((l) => !/^https?:\/\//i.test(l));
+          urlLines.forEach((l) => sources.push({ type: 'url', value: normalizeExtensionUrl(l) }));
+          if (codeLines.length) {
+            sources.push({ type: 'code', value: codeLines.join('\n') });
+          }
         }
-      });
-
-      return { urls, inlineScripts };
+      }
+      if (extraJsCode && extraJsCode.trim()) {
+        sources.push({ type: 'code', value: extraJsCode });
+      }
+      return sources;
     }
 
     async function handleSb3Submit(e) {
@@ -2187,30 +2659,21 @@
       const w = Math.max(240, Math.min(1920, parseInt(document.getElementById('sb3WidthInput').value, 10) || 640));
       const h = Math.max(180, Math.min(1080, parseInt(document.getElementById('sb3HeightInput').value, 10) || 480));
 
-      const parsedExt = parseTurboWarpExtensionEntries(document.getElementById('sb3ExtensionUrls')?.value || '');
-      if (pendingJsExtensionText.trim()) {
-        parsedExt.inlineScripts.push({
-          name: pendingJsExtensionName || 'custom-extension.js',
-          code: pendingJsExtensionText
-        });
-      }
-
       const id = 'sb3-' + Date.now();
       const buffer = await pendingSb3File.arrayBuffer();
       await sb3Vault.saveFile(id, buffer, pendingSb3File.name);
 
-      const extCount = parsedExt.urls.length + parsedExt.inlineScripts.length;
+      const extRaw = document.getElementById('sb3ExtensionUrls')?.value || '';
+      const extensionSources = parseTurboWarpExtensions(extRaw, pendingJsExtensionText);
+
       const newProj = {
         id: id,
         title: rawTitle.toUpperCase(),
-        subtitle: extCount > 0
-          ? `Private .sb3 • ${extCount} TurboWarp ext${extCount > 1 ? 's' : ''}`
-          : `Private .sb3 (${pendingSb3File.name})`,
+        subtitle: `Private .sb3 (${pendingSb3File.name})`,
         fileName: pendingSb3File.name,
         stageW: w,
         stageH: h,
-        extensionUrls: parsedExt.urls,
-        inlineExtensions: parsedExt.inlineScripts,
+        extensionUrls: extensionSources,
         isScratch: true,
         isPrivateSb3: true,
         isCustom: true
@@ -2233,6 +2696,7 @@
 
     function previewExtractedId(val) {
       const status = document.getElementById('extractedIdStatus');
+      if (!status) return;
       const id = extractScratchId(val);
       if (!val.trim()) {
         status.textContent = 'Paste any shared Scratch link or project ID number.';
@@ -2266,6 +2730,7 @@
         subtitle: 'Imported Scratch project',
         scratchId: scratchId,
         engine: engine,
+        extensionUrls: [],
         stageW: w,
         stageH: h,
         isScratch: true,
@@ -2292,10 +2757,31 @@
       showToast('Removed project');
     }
 
-    function getScratchEmbedUrl(scratchId, engine) {
-      return engine === 'scratch'
-        ? `https://scratch.mit.edu/projects/${scratchId}/embed`
-        : `https://turbowarp.org/${scratchId}/embed`;
+    function getScratchEmbedUrl(scratchId, engine, extensionUrls = []) {
+      if (engine === 'scratch') {
+        return `https://scratch.mit.edu/projects/${encodeURIComponent(scratchId)}/embed`;
+      }
+      const url = new URL(`https://turbowarp.org/${encodeURIComponent(scratchId)}/embed`);
+      url.searchParams.set('settings-button', '');
+      (Array.isArray(extensionUrls) ? extensionUrls : []).forEach((item) => {
+        const raw = typeof item === 'string' ? item : (item && item.type === 'url' ? item.value : '');
+        if (!raw) return;
+        try {
+          const extensionUrl = new URL(normalizeExtensionUrl(raw));
+          if (extensionUrl.protocol === 'https:' || extensionUrl.hostname === 'localhost') {
+            url.searchParams.append('extension', extensionUrl.href);
+          }
+        } catch (error) {
+          // Ignore malformed extension URLs
+        }
+      });
+      return url.toString();
+    }
+
+    function getPlayerFrameSize(w, h, engine) {
+      return engine === 'turbowarp'
+        ? { width: w + 2, height: h + 52 }
+        : { width: w, height: h };
     }
 
     // Dynamic Loader for @turbowarp/scaffolding (Native Local .sb3 Runner)
@@ -2476,8 +2962,17 @@
       activeStageH = h;
       const box = document.getElementById('activeStageBox');
       if (box) {
-        box.style.width = w + 'px';
-        box.style.height = h + 'px';
+        const frame = document.getElementById('scratchStageFrame');
+        const engine = activeModalGame && activeModalGame.engine ? activeModalGame.engine : defaultEngine;
+        const frameSize = frame ? getPlayerFrameSize(w, h, engine) : { width: w, height: h };
+        box.style.width = frameSize.width + 'px';
+        box.style.height = frameSize.height + 'px';
+        if (frame) {
+          frame.width = frameSize.width;
+          frame.height = frameSize.height;
+          frame.style.width = frameSize.width + 'px';
+          frame.style.height = frameSize.height + 'px';
+        }
       }
       const wInput = document.getElementById('liveStageW');
       const hInput = document.getElementById('liveStageH');
@@ -2498,8 +2993,12 @@
         }
       }
 
-      if (activeScaffolding && typeof activeScaffolding.relayout === 'function') {
-        activeScaffolding.relayout();
+      if (activeScaffolding) {
+        activeScaffolding.width = w;
+        activeScaffolding.height = h;
+        if (typeof activeScaffolding.relayout === 'function') {
+          activeScaffolding.relayout();
+        }
       }
 
       const canvas = document.getElementById('gameCanvas');
@@ -2583,6 +3082,9 @@
       activeKeyHandlers.forEach(({ type, fn }) => window.removeEventListener(type, fn));
       activeKeyHandlers = [];
 
+      activeExtensionBlobUrls.forEach((blobUrl) => URL.revokeObjectURL(blobUrl));
+      activeExtensionBlobUrls = [];
+
       if (activeScaffolding) {
         try {
           activeScaffolding.stopAll();
@@ -2591,184 +3093,10 @@
         }
         activeScaffolding = null;
       }
-
-      if (activeExtensionBlobUrls.length) {
-        activeExtensionBlobUrls.forEach((blobUrl) => {
-          try {
-            URL.revokeObjectURL(blobUrl);
-          } catch (e) {
-            // Ignore
-          }
-        });
-        activeExtensionBlobUrls = [];
-      }
     }
 
-    // Open Game / Scratch Theater Modal
-    async function openGameModal(gameId) {
-      cleanupActiveGame();
-
-      const game = getAllGames().find((g) => g.id === gameId) || builtInGames[0];
-      activeModalGame = game;
-
-      const [defW, defH] = defaultStage.split('x').map(Number);
-      activeStageW = game.stageW || defW || 640;
-      activeStageH = game.stageH || defH || 480;
-
-      document.getElementById('modalGameTitle').textContent = game.title;
-      document.getElementById('modalPrivateTag').style.display = game.isPrivateSb3 ? 'inline-block' : 'none';
-      document.getElementById('modalScaffoldingControls').style.display = game.isPrivateSb3 ? 'flex' : 'none';
-      document.getElementById('modalSaveStatus').textContent = '● Saved';
-
-      const switchWrap = document.getElementById('modalEngineSwitch');
-      const bodyEl = document.getElementById('modalBody');
-      switchWrap.innerHTML = '';
-
-      if (game.id === 'super-hoopz') {
-        const hs = gameSaves.hoopz;
-        bodyEl.innerHTML = `
-          ${buildStageToolbarHtml(activeStageW, activeStageH)}
-          <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px; font-size:12px;">
-            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-              <span style="color:#9ca3af;">Ball Skin:</span>
-              <button type="button" class="size-pill ${hs.selectedSkin === 'classic' ? 'active' : ''}" id="skinBtnClassic" onclick="selectHoopSkin('classic')">Classic</button>
-              <button type="button" class="size-pill ${hs.selectedSkin === 'gold' ? 'active' : ''}" id="skinBtnGold" onclick="selectHoopSkin('gold')">
-                ${hs.unlockedSkins.includes('gold') ? 'Gold Star' : '🔒 Gold (5 Baskets)'}
-              </button>
-              <button type="button" class="size-pill ${hs.selectedSkin === 'neon' ? 'active' : ''}" id="skinBtnNeon" onclick="selectHoopSkin('neon')">
-                ${hs.unlockedSkins.includes('neon') ? 'Neon Cyber' : '🔒 Neon (15 Baskets)'}
-              </button>
-            </div>
-            <div style="display:flex; gap:12px; font-weight:800;">
-              <span style="color:#9ca3af;">STREAK: <span id="hoopStreak" style="color:#fff;">0</span></span>
-              <span style="color:#9ca3af;">BEST: <span id="hoopBest" style="color:#fde047;">${hs.highScore}</span></span>
-              <span style="color:#facc15;">SCORE: <span id="hoopScore">0</span></span>
-            </div>
-          </div>
-          <div class="stage-outer-wrap">
-            <div id="activeStageBox" class="stage-frame-box" style="width:${activeStageW}px; height:${activeStageH}px;">
-              <canvas id="gameCanvas" style="width:100%; height:100%; display:block; cursor:crosshair;"></canvas>
-            </div>
-          </div>
-        `;
-        document.getElementById('gameModal').classList.add('open');
-        startHoopMiniGame(activeStageW, activeStageH);
-      } else if (game.id === 'battlefront-3') {
-        const bf = gameSaves.battlefront;
-        bodyEl.innerHTML = `
-          ${buildStageToolbarHtml(activeStageW, activeStageH)}
-          <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px; font-size:12px;">
-            <span style="color:#9ca3af;">Move: <strong>←/→ or Mouse</strong> • Fire Laser: <strong>Space or Click</strong></span>
-            <div style="display:flex; gap:12px; font-weight:800;">
-              <span style="color:#60a5fa;">WAVE: <span id="bfWave">${bf.highestWave}</span></span>
-              <span style="color:#9ca3af;">HIGH: <span id="bfHigh" style="color:#fde047;">${bf.highScore}</span></span>
-              <span style="color:#facc15;">SCORE: <span id="bfScore">0</span></span>
-            </div>
-          </div>
-          <div class="stage-outer-wrap">
-            <div id="activeStageBox" class="stage-frame-box" style="width:${activeStageW}px; height:${activeStageH}px;">
-              <canvas id="gameCanvas" style="width:100%; height:100%; display:block; cursor:crosshair;"></canvas>
-            </div>
-          </div>
-        `;
-        document.getElementById('gameModal').classList.add('open');
-        startBattlefrontMiniGame(activeStageW, activeStageH);
-      } else if (game.id === 'fnaf-2026') {
-        const fn = gameSaves.fnaf;
-        bodyEl.innerHTML = `
-          ${buildStageToolbarHtml(activeStageW, activeStageH)}
-          <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px; font-size:12px;">
-            <span style="color:#9ca3af;">Click <strong>LEFT DOOR</strong>, <strong>RIGHT DOOR</strong>, or <strong>FLASHLIGHT</strong> to block animatronics until 6 AM!</span>
-            <div style="display:flex; gap:12px; font-weight:800;">
-              <span style="color:#a78bfa;">NIGHT: <span id="fnafNight">${fn.currentNight}</span></span>
-              <span style="color:#4ade80;">POWER: <span id="fnafPower">100</span>%</span>
-              <span style="color:#facc15;">TIME: <span id="fnafClock">12 AM</span></span>
-            </div>
-          </div>
-          <div class="stage-outer-wrap">
-            <div id="activeStageBox" class="stage-frame-box" style="width:${activeStageW}px; height:${activeStageH}px;">
-              <canvas id="gameCanvas" style="width:100%; height:100%; display:block; cursor:pointer;"></canvas>
-            </div>
-          </div>
-        `;
-        document.getElementById('gameModal').classList.add('open');
-        startFnafMiniGame(activeStageW, activeStageH);
-      } else if (game.isPrivateSb3) {
-        const stored = await sb3Vault.getFile(game.id);
-        bodyEl.innerHTML = `
-          ${buildStageToolbarHtml(activeStageW, activeStageH)}
-          <div class="stage-outer-wrap">
-            <div id="activeStageBox" class="stage-frame-box" style="width:${activeStageW}px; height:${activeStageH}px;">
-              <div id="scaffoldingMount" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#fde047; font-size:13px; font-weight:700;">
-                Loading Scratch VM &amp; your .sb3 file...
-              </div>
-            </div>
-          </div>
-          <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; margin-top:10px; font-size:11px; color:#9ca3af;">
-            <span>🔒 Private Local File: <strong style="color:#fde047;">${escapeHtml(game.fileName || 'project.sb3')}</strong> • Cloud variables (☁) auto-save locally</span>
-            <div style="display:flex; gap:6px;">
-              ${stored ? `<button type="button" class="size-pill" onclick="downloadPrivateSb3('${game.id}')">⬇ Export .sb3</button>` : ''}
-            </div>
-          </div>
-        `;
-        document.getElementById('gameModal').classList.add('open');
-
-        if (stored && stored.buffer) {
-          await mountLocalSb3Scaffolding(
-            game.id,
-            stored.buffer,
-            activeStageW,
-            activeStageH,
-            game.extensionUrls || [],
-            game.inlineExtensions || []
-          );
-        } else {
-          const mount = document.getElementById('scaffoldingMount');
-          if (mount) {
-            mount.innerHTML = `<div style="padding:20px; text-align:center; color:#f87171;">Local .sb3 binary data was not found. Please re-upload your .sb3 file.</div>`;
-          }
-        }
-      } else if (game.isScratch) {
-        const activeEngine = game.engine || defaultEngine;
-        switchWrap.innerHTML = `
-          <button type="button" class="modal-close-btn" style="${activeEngine === 'turbowarp' ? 'background:#facc15;color:#111214;' : ''}" onclick="switchEmbedEngine('${game.id}', 'turbowarp')">TurboWarp</button>
-          <button type="button" class="modal-close-btn" style="${activeEngine === 'scratch' ? 'background:#facc15;color:#111214;' : ''}" onclick="switchEmbedEngine('${game.id}', 'scratch')">Scratch</button>
-        `;
-        bodyEl.innerHTML = `
-          ${buildStageToolbarHtml(activeStageW, activeStageH)}
-          <div class="stage-outer-wrap">
-            <div id="activeStageBox" class="stage-frame-box" style="width:${activeStageW}px; height:${activeStageH}px;">
-              <iframe
-                id="scratchStageFrame"
-                src="${getScratchEmbedUrl(game.scratchId, activeEngine)}"
-                allowtransparency="true"
-                frameborder="0"
-                scrolling="no"
-                allowfullscreen
-                style="width:100%; height:100%; border:0;"
-              ></iframe>
-            </div>
-          </div>
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; font-size:11px; color:#9ca3af;">
-            <span>Scratch Project ID: <strong style="color:#fff;">${escapeHtml(game.scratchId)}</strong> • Cloud variables (☁) &amp; Save Codes persist locally</span>
-            <a href="https://scratch.mit.edu/projects/${encodeURIComponent(game.scratchId)}/" target="_blank" rel="noopener noreferrer" style="color:#facc15; text-decoration:none; font-weight:700;">Open on Scratch ↗</a>
-          </div>
-        `;
-        document.getElementById('gameModal').classList.add('open');
-      }
-
-      playBeep(520, 0.08);
-    }
-
-    // Mount Local .sb3 Directly Using @turbowarp/scaffolding + Cloud LocalStorage Persistence
-    async function mountLocalSb3Scaffolding(
-      projectId,
-      arrayBuffer,
-      stageWidth = activeStageW,
-      stageHeight = activeStageH,
-      extensionUrls = [],
-      inlineExtensions = []
-    ) {
+    // Mount Local .sb3 Directly Using @turbowarp/scaffolding + Unsandboxed Extensions
+    async function mountLocalSb3Scaffolding(projectId, arrayBuffer, stageWidth = activeStageW, stageHeight = activeStageH, extensionUrls = []) {
       const mount = document.getElementById('scaffoldingMount');
       if (!mount) return;
 
@@ -2781,17 +3109,14 @@
         scaffolding.height = stageHeight;
         scaffolding.resizeMode = 'preserve-ratio';
         scaffolding.editableLists = false;
-        // Disable packagedRuntime so external and custom Blob extensions are allowed to register
         scaffolding.usePackagedRuntime = false;
         scaffolding.setup();
 
-        // Allow unsandboxed TurboWarp extensions (Gamepad, Pen+, Box2D, WebGL, Fetch, etc.)
         if (scaffolding.vm && scaffolding.vm.securityManager) {
           scaffolding.vm.securityManager.getSandboxMode = () => 'unsandboxed';
           scaffolding.vm.securityManager.canLoadExtensionFromProject = () => true;
         }
 
-        // Enable persistent localStorage Cloud Variables per-project!
         if (Scaffolding.Cloud && Scaffolding.Cloud.LocalStorageProvider) {
           const cloudKey = `allstar_arcade_cloud_${projectId}`;
           scaffolding.addCloudProvider(new Scaffolding.Cloud.LocalStorageProvider(cloudKey));
@@ -2800,43 +3125,31 @@
         scaffolding.appendTo(mount);
         activeScaffolding = scaffolding;
 
-        // Build full list of extension URLs (converting local .js code into Blob URLs)
-        const allExtSources = [];
-        (Array.isArray(extensionUrls) ? extensionUrls : []).forEach((u) => {
-          const norm = normalizeExtensionUrl(u);
-          if (norm) allExtSources.push({ label: norm, url: norm });
-        });
-        (Array.isArray(inlineExtensions) ? inlineExtensions : []).forEach((ext) => {
-          if (ext && ext.code) {
-            const blob = new Blob([ext.code], { type: 'application/javascript' });
-            const blobUrl = URL.createObjectURL(blob);
-            activeExtensionBlobUrls.push(blobUrl);
-            allExtSources.push({ label: ext.name || 'custom.js', url: blobUrl });
-          }
-        });
-
-        let loadedExtCount = 0;
-        let failedExtCount = 0;
-        for (const extItem of allExtSources) {
+        const validSources = Array.isArray(extensionUrls) ? extensionUrls : [];
+        for (const item of validSources) {
           try {
-            await scaffolding.vm.extensionManager.loadExtensionURL(extItem.url);
-            loadedExtCount++;
+            let loadTarget = '';
+            if (typeof item === 'string') {
+              loadTarget = normalizeExtensionUrl(item);
+            } else if (item && item.type === 'url') {
+              loadTarget = normalizeExtensionUrl(item.value);
+            } else if (item && item.type === 'code') {
+              const blob = new Blob([item.value], { type: 'application/javascript' });
+              loadTarget = URL.createObjectURL(blob);
+              activeExtensionBlobUrls.push(loadTarget);
+            }
+            if (loadTarget) {
+              await scaffolding.vm.extensionManager.loadExtensionURL(loadTarget);
+            }
           } catch (extensionError) {
-            failedExtCount++;
-            console.warn('Could not load TurboWarp extension:', extItem.label, extensionError);
+            console.warn('Could not load TurboWarp extension:', item, extensionError);
+            showToast('Warning: One custom extension failed to load');
           }
         }
 
         await scaffolding.loadProject(arrayBuffer);
         scaffolding.greenFlag();
-
-        if (failedExtCount > 0) {
-          showToast(`Loaded .sb3 (${loadedExtCount} ext ok, ${failedExtCount} blocked by CORS)`);
-        } else if (loadedExtCount > 0) {
-          showToast(`Loaded .sb3 + ${loadedExtCount} TurboWarp extension${loadedExtCount > 1 ? 's' : ''}!`);
-        } else {
-          showToast('Loaded .sb3 project with local cloud save!');
-        }
+        showToast('Loaded .sb3 project with TurboWarp extensions!');
       } catch (err) {
         mount.innerHTML = `
           <div style="padding:22px; text-align:center; max-width:420px;">
@@ -2889,7 +3202,7 @@
     }
 
     // =========================================================
-    // GAME 1: SUPER HOOPZ 2.0 (Persistent High Score, Streak, Skins)
+    // GAME 1: SUPER HOOPZ 2.0
     // =========================================================
     function selectHoopSkin(skin) {
       const hs = gameSaves.hoopz;
@@ -2950,12 +3263,9 @@
         const rim = { x: w - 125, y: Math.round(h * 0.36), w: 58 };
 
         ctx.clearRect(0, 0, w, h);
-
-        // Arena Backdrop
         ctx.fillStyle = '#12151e';
         ctx.fillRect(0, 0, w, h);
 
-        // Court Floor
         ctx.fillStyle = '#231c16';
         ctx.fillRect(0, h - 26, w, 26);
         ctx.strokeStyle = '#facc15';
@@ -2965,7 +3275,6 @@
         ctx.lineTo(w, h - 26);
         ctx.stroke();
 
-        // Backboard, Net & Rim
         ctx.fillStyle = '#e2e8f0';
         ctx.fillRect(rim.x + rim.w, rim.y - 52, 8, 72);
         ctx.strokeStyle = 'rgba(255,255,255,0.45)';
@@ -2984,7 +3293,6 @@
         ctx.lineTo(rim.x + rim.w, rim.y);
         ctx.stroke();
 
-        // Physics
         if (ball.active) {
           ball.vy += 0.38;
           ball.x += ball.vx;
@@ -3030,7 +3338,6 @@
           ball.y = h - 46;
         }
 
-        // Basketball Skin Rendering
         const skin = gameSaves.hoopz.selectedSkin;
         ctx.fillStyle = skin === 'gold' ? '#facc15' : (skin === 'neon' ? '#22d3ee' : '#ea580c');
         ctx.beginPath();
@@ -3047,7 +3354,7 @@
     }
 
     // =========================================================
-    // GAME 2: STAR WARS BATTLEFRONT III (Persistent Wave & High Score)
+    // GAME 2: STAR WARS BATTLEFRONT III
     // =========================================================
     function startBattlefrontMiniGame(initW, initH) {
       const canvas = document.getElementById('gameCanvas');
@@ -3111,13 +3418,11 @@
         ctx.fillStyle = '#07090f';
         ctx.fillRect(0, 0, w, h);
 
-        // Starfield
         ctx.fillStyle = 'rgba(255,255,255,0.45)';
         for (let s = 0; s < 28; s++) {
           ctx.fillRect((s * 97) % w, (s * 53 + Math.floor(performance.now() * 0.04)) % h, 2, 2);
         }
 
-        // Lasers
         for (let i = lasers.length - 1; i >= 0; i--) {
           const l = lasers[i];
           l.y += l.vy;
@@ -3126,7 +3431,6 @@
           if (l.y < -20) lasers.splice(i, 1);
         }
 
-        // Enemies
         const speed = 1.6 + wave * 0.35;
         for (let j = enemies.length - 1; j >= 0; j--) {
           const en = enemies[j];
@@ -3139,7 +3443,6 @@
             en.y = 48;
           }
 
-          // TIE Fighter Silhouette
           ctx.strokeStyle = '#f87171';
           ctx.lineWidth = 2.5;
           ctx.beginPath();
@@ -3150,7 +3453,6 @@
           ctx.lineTo(en.x + 16, en.y + 14);
           ctx.stroke();
 
-          // Collision
           for (let i = lasers.length - 1; i >= 0; i--) {
             if (Math.hypot(lasers[i].x - en.x, lasers[i].y - en.y) < 18) {
               lasers.splice(i, 1);
@@ -3183,7 +3485,6 @@
           showToast('Wave ' + wave + ' cleared & saved!');
         }
 
-        // Player Starfighter
         ctx.fillStyle = '#facc15';
         ctx.beginPath();
         ctx.moveTo(playerX, h - 46);
@@ -3199,7 +3500,7 @@
     }
 
     // =========================================================
-    // GAME 3: FNAF 2026 (Persistent Night Progression & Survival Save)
+    // GAME 3: FNAF 2026
     // =========================================================
     function startFnafMiniGame(initW, initH) {
       const canvas = document.getElementById('gameCanvas');
@@ -3295,17 +3596,14 @@
           }
         }
 
-        // Security Room Rendering
         ctx.fillStyle = flashOn ? '#1e293b' : '#080a0f';
         ctx.fillRect(0, 0, w, h);
 
-        // Left & Right Doorways
         ctx.fillStyle = leftDoorClosed ? '#facc15' : '#111827';
         ctx.fillRect(18, 40, w * 0.24, h - 80);
         ctx.fillStyle = rightDoorClosed ? '#facc15' : '#111827';
         ctx.fillRect(w - 18 - w * 0.24, 40, w * 0.24, h - 80);
 
-        // Animatronic Eyes when Threat High
         if (!leftDoorClosed && leftThreat > 0.45) {
           ctx.fillStyle = '#e0f2fe';
           ctx.beginPath();
@@ -3321,7 +3619,6 @@
           ctx.fill();
         }
 
-        // Labels
         ctx.fillStyle = leftDoorClosed ? '#111215' : '#ffffff';
         ctx.font = 'bold 13px sans-serif';
         ctx.textAlign = 'center';
@@ -3396,6 +3693,19 @@
       if (engineSelect) engineSelect.value = defaultEngine;
       const stageSelect = document.getElementById('defaultStageSelect');
       if (stageSelect) stageSelect.value = defaultStage;
+      const tagInput = document.getElementById('playerTagInput');
+      if (tagInput) tagInput.value = playerTag;
+      const topBadge = document.getElementById('topBarPlayerBadge');
+      if (topBadge) topBadge.textContent = playerTag;
+      const autoFsBtn = document.getElementById('autoFsToggleBtn');
+      if (autoFsBtn) autoFsBtn.classList.toggle('off', !autoFullscreen);
+      const fpsBtn = document.getElementById('fpsToggleBtn');
+      if (fpsBtn) fpsBtn.classList.toggle('off', !showFpsCounter);
+      const fpsBadge = document.getElementById('liveFpsBadge');
+      if (fpsBadge) fpsBadge.classList.toggle('visible', showFpsCounter);
+      if (showFpsCounter) startFpsCounterLoop();
+
+      setAccentPalette(currentAccent, true);
       setBackgroundTheme(currentTheme, true);
       refreshHomeBadges();
       renderLibrary();
