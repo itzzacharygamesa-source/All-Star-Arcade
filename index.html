@@ -1,0 +1,3404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ALL STAR ARCADE</title>
+  <style>
+    :root {
+      --bg-base: #0d0e11;
+      --bg-topbar: #111215;
+      --bg-sidebar: #141519;
+      --bg-card: #18191d;
+      --bg-card-hover: #1f2127;
+      --bg-input: #111215;
+      --border-subtle: rgba(255, 255, 255, 0.06);
+      --accent: #facc15;
+      --accent-dark: #eab308;
+      --accent-light: #fde047;
+      --accent-text: #111215;
+      --text-main: #ffffff;
+      --text-muted: #9ca3af;
+      --text-dim: #6b7280;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    html, body {
+      width: 100%;
+      min-height: 100vh;
+      background-color: #0d0e11;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      overflow-x: hidden;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      transition: background 0.35s ease;
+    }
+
+    /* Dark Mode Background */
+    .app-shell {
+      flex: 1;
+      display: flex;
+      min-height: calc(100vh - 48px);
+      background:
+        radial-gradient(ellipse 68% 45% at 56% 18%, rgba(250, 204, 21, 0.09), transparent 72%),
+        radial-gradient(circle at 20% 78%, rgba(255, 255, 255, 0.015), transparent 45%),
+        #0d0e11;
+      transition: background 0.35s ease;
+    }
+
+    /* Sunset Mode Background */
+    body.theme-sunset .top-bar {
+      background-color: rgba(20, 10, 36, 0.94);
+      border-bottom-color: rgba(251, 146, 60, 0.25);
+    }
+
+    body.theme-sunset .sidebar {
+      background-color: rgba(22, 11, 40, 0.9);
+      border-right-color: rgba(251, 146, 60, 0.22);
+    }
+
+    body.theme-sunset .app-shell {
+      background:
+        radial-gradient(circle at 78% 88%, rgba(250, 204, 21, 0.42) 0%, transparent 45%),
+        radial-gradient(circle at 24% 82%, rgba(249, 115, 22, 0.44) 0%, transparent 52%),
+        linear-gradient(
+          180deg,
+          #160d29 0%,
+          #2e1347 26%,
+          #6b1d5c 54%,
+          #b83b4b 78%,
+          #ea6a2c 93%,
+          #f59e0b 100%
+        );
+    }
+
+    body.theme-sunset .hero-card,
+    body.theme-sunset .game-card,
+    body.theme-sunset .panel-box {
+      background-color: rgba(20, 14, 34, 0.84);
+      backdrop-filter: blur(10px);
+    }
+
+    body.theme-sunset .game-card:hover {
+      background-color: rgba(32, 21, 52, 0.92);
+    }
+
+    /* Top Window Bar */
+    .top-bar {
+      height: 48px;
+      width: 100%;
+      background-color: var(--bg-topbar);
+      border-bottom: 1px solid #1e2026;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      z-index: 30;
+    }
+
+    .win-close-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      background-color: #22242a;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      color: #9ca3af;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+
+    .win-close-btn:hover {
+      background-color: #2f323b;
+      color: #ffffff;
+    }
+
+    .app-title {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #ffffff;
+    }
+
+    .traffic-lights {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .traffic-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    /* Left Sidebar */
+    .sidebar {
+      width: 176px;
+      background-color: var(--bg-sidebar);
+      border-right: 1px solid #1d1f25;
+      padding: 22px 12px 16px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .nav-btn {
+      position: relative;
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 8px;
+      padding: 10px 12px 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      text-align: left;
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+
+    .nav-btn:hover {
+      background-color: #1c1e24;
+      color: #ffffff;
+    }
+
+    .nav-btn.active {
+      background-color: #1b1d23;
+      color: var(--accent);
+      font-weight: 800;
+    }
+
+    .nav-btn.active::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 7px;
+      bottom: 7px;
+      width: 3.5px;
+      border-radius: 0 4px 4px 0;
+      background-color: var(--accent);
+      box-shadow: 0 0 10px rgba(250, 204, 21, 0.8);
+    }
+
+    /* Main Content Container */
+    .main-area {
+      flex: 1;
+      padding: 26px 24px 48px;
+      display: flex;
+      justify-content: center;
+      overflow-y: auto;
+    }
+
+    .content-wrapper {
+      width: 100%;
+      max-width: 810px;
+    }
+
+    .view-section {
+      display: none;
+    }
+
+    .view-section.active {
+      display: block;
+      animation: fadeSlide 0.2s ease-out;
+    }
+
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Featured Hero Card */
+    .hero-card {
+      position: relative;
+      background-color: var(--bg-card);
+      border-radius: 16px;
+      padding: 16px;
+      border: 1.5px solid rgba(250, 204, 21, 0.55);
+      box-shadow:
+        0 0 28px rgba(250, 204, 21, 0.25),
+        0 18px 34px rgba(0, 0, 0, 0.55);
+      margin-bottom: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .hero-card.no-glow {
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .hero-banner {
+      position: relative;
+      width: 100%;
+      max-width: 340px;
+      height: 168px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #1d2633;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+      flex-shrink: 0;
+    }
+
+    .hero-info-col {
+      flex: 1;
+      min-width: 240px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .hero-badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .gold-pill-badge {
+      background-color: rgba(250, 204, 21, 0.16);
+      color: #fde047;
+      border: 1px solid rgba(250, 204, 21, 0.38);
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 99px;
+      letter-spacing: 0.03em;
+    }
+
+    .hero-title {
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: #ffffff;
+    }
+
+    .hero-subtitle {
+      font-size: 12.5px;
+      color: #a1a7b3;
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    .play-btn {
+      margin-top: 14px;
+      background: linear-gradient(180deg, var(--accent-light) 0%, var(--accent-dark) 100%);
+      color: var(--accent-text);
+      border: none;
+      border-radius: 8px;
+      padding: 10px 42px;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(250, 204, 21, 0.4);
+      transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .play-btn:hover {
+      filter: brightness(1.06);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 22px rgba(250, 204, 21, 0.55);
+    }
+
+    .play-btn:active {
+      transform: scale(0.98);
+    }
+
+    .play-btn-sm {
+      margin-top: 0;
+      padding: 8px 14px;
+      font-size: 12px;
+    }
+
+    .secondary-btn-sm {
+      background-color: #23262e;
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      padding: 8px 13px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .secondary-btn-sm:hover {
+      background-color: #2d313b;
+      border-color: rgba(250, 204, 21, 0.45);
+    }
+
+    /* 2x2 Cards Grid */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .game-card {
+      position: relative;
+      background-color: var(--bg-card);
+      border-radius: 14px;
+      padding: 14px;
+      border: 1px solid var(--border-subtle);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .game-card:hover {
+      transform: translateY(-3px);
+      background-color: var(--bg-card-hover);
+      border-color: rgba(250, 204, 21, 0.45);
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.5), 0 0 18px rgba(250, 204, 21, 0.16);
+    }
+
+    .card-thumb {
+      width: 100%;
+      height: 112px;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 12px;
+      position: relative;
+    }
+
+    .card-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      color: #ffffff;
+    }
+
+    .card-save-tag {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: #fde047;
+      background-color: rgba(250, 204, 21, 0.12);
+      border: 1px solid rgba(250, 204, 21, 0.25);
+      padding: 2px 7px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+
+    .card-desc {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .card-action-group {
+      position: absolute;
+      top: 22px;
+      right: 22px;
+      z-index: 15;
+      display: flex;
+      gap: 6px;
+    }
+
+    .import-pill-btn {
+      background-color: var(--accent);
+      color: #111214;
+      border: none;
+      border-radius: 7px;
+      padding: 4px 9px;
+      font-size: 10.5px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      transition: transform 0.15s ease, background-color 0.15s ease;
+    }
+
+    .import-pill-btn:hover {
+      background-color: var(--accent-light);
+      transform: scale(1.04);
+    }
+
+    .import-pill-btn.dark-pill {
+      background-color: rgba(17, 18, 21, 0.92);
+      color: #fde047;
+      border: 1px solid rgba(250, 204, 21, 0.45);
+    }
+
+    .import-pill-btn.dark-pill:hover {
+      background-color: #1f2229;
+    }
+
+    /* Library, Updates & Settings Panels */
+    .section-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .section-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    .text-input, .select-input {
+      background-color: var(--bg-input);
+      border: 1px solid #282b33;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 12px;
+      color: #ffffff;
+      outline: none;
+      user-select: text;
+    }
+
+    .text-input:focus, .select-input:focus {
+      border-color: var(--accent);
+    }
+
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .filter-tab {
+      background-color: var(--bg-card);
+      color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .filter-tab.active {
+      background-color: var(--accent);
+      color: #111214;
+      border-color: var(--accent);
+    }
+
+    .library-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    .panel-box {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 18px;
+    }
+
+    .setting-row {
+      padding: 16px 18px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .setting-row:last-child {
+      border-bottom: none;
+    }
+
+    .theme-switcher {
+      display: flex;
+      gap: 6px;
+      background-color: #111214;
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .theme-choice-btn {
+      border: none;
+      border-radius: 7px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: transparent;
+      color: var(--text-muted);
+      transition: all 0.15s ease;
+    }
+
+    .theme-choice-btn.active {
+      background-color: var(--accent);
+      color: #111214;
+    }
+
+    .toggle-switch {
+      width: 44px;
+      height: 24px;
+      border-radius: 99px;
+      border: none;
+      background-color: var(--accent);
+      padding: 2px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      transition: background-color 0.2s ease;
+    }
+
+    .toggle-switch.off {
+      background-color: #2b2e36;
+      justify-content: flex-start;
+    }
+
+    .toggle-knob {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background-color: #111214;
+    }
+
+    .toggle-switch.off .toggle-knob {
+      background-color: #ffffff;
+    }
+
+    /* Modals & Theater Stage */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      background-color: rgba(0, 0, 0, 0.88);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-card {
+      width: 100%;
+      max-width: 860px;
+      max-height: 95vh;
+      display: flex;
+      flex-direction: column;
+      background-color: #16181c;
+      border: 1px solid rgba(250, 204, 21, 0.45);
+      border-radius: 16px;
+      box-shadow: 0 0 50px rgba(250, 204, 21, 0.25);
+      overflow: hidden;
+    }
+
+    .modal-card.narrow {
+      max-width: 490px;
+    }
+
+    /* Fullscreen Mode Support */
+    .modal-card:fullscreen,
+    .modal-card.pseudo-fullscreen {
+      max-width: 100vw !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      max-height: 100vh !important;
+      border-radius: 0 !important;
+      border: none !important;
+    }
+
+    .modal-card:fullscreen .stage-outer-wrap,
+    .modal-card.pseudo-fullscreen .stage-outer-wrap {
+      flex: 1;
+      height: calc(100vh - 124px);
+      max-height: none;
+    }
+
+    .modal-header {
+      padding: 11px 16px;
+      background-color: #111214;
+      border-bottom: 1px solid #22252b;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .modal-close-btn {
+      background-color: #222428;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #d1d5db;
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+
+    .modal-close-btn:hover {
+      background-color: #2f333a;
+      color: #ffffff;
+    }
+
+    .save-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 99px;
+      background-color: rgba(34, 197, 94, 0.14);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .modal-body {
+      padding: 14px 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    /* Stage Controls & Resizable Container */
+    .stage-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background-color: #111215;
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 10px;
+      padding: 8px 12px;
+      margin-bottom: 10px;
+    }
+
+    .stage-presets {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .size-pill {
+      background-color: #1c1e24;
+      color: #cbd5e1;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .size-pill.active {
+      background-color: var(--accent);
+      color: #111214;
+      border-color: var(--accent);
+    }
+
+    .dim-input {
+      width: 56px;
+      background-color: #181a20;
+      border: 1px solid #2b2f3a;
+      border-radius: 6px;
+      padding: 4px 6px;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 700;
+      text-align: center;
+      outline: none;
+      user-select: text;
+    }
+
+    .dim-input:focus {
+      border-color: var(--accent);
+    }
+
+    .stage-outer-wrap {
+      width: 100%;
+      min-height: 280px;
+      max-height: 62vh;
+      overflow: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #090a0d;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 8px;
+    }
+
+    .stage-frame-box {
+      position: relative;
+      background-color: #0d0f14;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65);
+      transition: width 0.2s ease, height 0.2s ease;
+      max-width: 100%;
+      flex-shrink: 0;
+    }
+
+    /* Save Codes Drawer inside Theater */
+    .save-drawer {
+      display: none;
+      background-color: #111215;
+      border: 1px solid rgba(250, 204, 21, 0.28);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+
+    .save-drawer.open {
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #d1d5db;
+      margin-bottom: 6px;
+    }
+
+    .file-drop-zone {
+      border: 1.5px dashed rgba(250, 204, 21, 0.45);
+      background-color: rgba(250, 204, 21, 0.05);
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .file-drop-zone:hover {
+      background-color: rgba(250, 204, 21, 0.1);
+      border-color: var(--accent);
+    }
+
+    .private-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background-color: rgba(250, 204, 21, 0.14);
+      color: #fde047;
+      border: 1px solid rgba(250, 204, 21, 0.3);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 99px;
+      margin-bottom: 12px;
+    }
+
+    /* Toast */
+    .toast-box {
+      position: fixed;
+      bottom: 18px;
+      right: 18px;
+      z-index: 60;
+      background-color: #18191c;
+      border: 1px solid rgba(250, 204, 21, 0.5);
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 10px 16px;
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      transform: translateY(8px);
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .toast-box.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 720px) {
+      .app-shell {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-around;
+        padding: 10px 8px;
+        border-right: none;
+        border-bottom: 1px solid #1c1e23;
+      }
+
+      .nav-btn {
+        width: auto;
+        justify-content: center;
+        padding: 8px 10px;
+      }
+
+      .nav-btn.active::before {
+        left: 8px;
+        right: 8px;
+        top: auto;
+        bottom: 0;
+        width: auto;
+        height: 3px;
+        border-radius: 4px 4px 0 0;
+      }
+
+      .cards-grid, .library-list {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP WINDOW BAR -->
+  <header class="top-bar">
+    <button id="windowCloseBtn" class="win-close-btn" title="Return to Home" aria-label="Return to Home">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+        <path d="M18 6L6 18M6 6l12 12"/>
+      </svg>
+    </button>
+
+    <div class="app-title">ALL STAR ARCADE</div>
+
+    <div class="traffic-lights" aria-hidden="true">
+      <span class="traffic-dot" style="background-color:#ff5f56;"></span>
+      <span class="traffic-dot" style="background-color:#ffbd2e;"></span>
+      <span class="traffic-dot" style="background-color:#27c93f;"></span>
+    </div>
+  </header>
+
+  <!-- MAIN SHELL -->
+  <div class="app-shell">
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar">
+      <button class="nav-btn active" data-nav="home" onclick="switchView('home')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M11.47 3.84a.75.75 0 011.06 0l8.69 8.69a.75.75 0 101.06-1.06l-8.689-8.69a2.25 2.25 0 00-3.182 0l-8.69 8.69a.75.75 0 001.061 1.06l8.69-8.69z" />
+          <path d="M12 5.432l8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 01-.75-.75v-4.5a.75.75 0 00-.75-.75h-3a.75.75 0 00-.75.75V21a.75.75 0 01-.75.75H5.625a1.875 1.875 0 01-1.875-1.875v-6.198a2.29 2.29 0 00.091-.086L12 5.43z" />
+        </svg>
+        <span>Home</span>
+      </button>
+
+      <button class="nav-btn" data-nav="games" onclick="switchView('games')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="16" rx="2" />
+          <path d="M7 8h6M7 12h10M7 16h4" />
+        </svg>
+        <span>Games</span>
+      </button>
+
+      <button class="nav-btn" data-nav="updates" onclick="switchView('updates')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+        </svg>
+        <span>Updates</span>
+      </button>
+
+      <button class="nav-btn" data-nav="settings" onclick="switchView('settings')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3" />
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+        </svg>
+        <span>Settings</span>
+      </button>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-area">
+      <div class="content-wrapper">
+
+        <!-- VIEW 1: HOME -->
+        <section id="view-home" class="view-section active">
+
+          <!-- FEATURED HERO CARD: SUPER HOOPZ 2.0 -->
+          <div id="featuredHeroCard" class="hero-card">
+            <div class="hero-banner">
+              <svg viewBox="0 0 420 175" width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
+                <defs>
+                  <linearGradient id="courtBg" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#2b3648"/>
+                    <stop offset="55%" stop-color="#19212c"/>
+                    <stop offset="100%" stop-color="#0f131a"/>
+                  </linearGradient>
+                  <radialGradient id="ballGrad" cx="35%" cy="30%" r="70%">
+                    <stop offset="0%" stop-color="#facc15"/>
+                    <stop offset="50%" stop-color="#ea580c"/>
+                    <stop offset="100%" stop-color="#5c2409"/>
+                  </radialGradient>
+                </defs>
+                <rect width="420" height="175" fill="url(#courtBg)"/>
+                <polygon points="75,0 385,0 410,125 65,125" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.22)" stroke-width="3"/>
+                <rect x="165" y="14" width="115" height="65" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="3.5"/>
+                <g stroke="#e2e8f0" stroke-width="2.1" fill="none" opacity="0.95">
+                  <path d="M162,48 L178,108 L266,108 L282,48"/>
+                  <path d="M168,66 L186,108 M184,48 L205,108 M206,48 L224,108 M228,48 L244,108 M250,48 L262,108"/>
+                  <path d="M276,66 L258,108 M260,48 L239,108 M238,48 L220,108 M216,48 L200,108 M194,48 L182,108"/>
+                  <path d="M166,68 Q222,78 278,68"/>
+                  <path d="M172,88 Q222,97 272,88"/>
+                </g>
+                <ellipse cx="222" cy="48" rx="64" ry="12" fill="none" stroke="#facc15" stroke-width="5.5"/>
+                <g transform="translate(328, 92)">
+                  <circle cx="0" cy="0" r="46" fill="url(#ballGrad)"/>
+                  <path d="M-45,-6 Q0,14 45,-6" fill="none" stroke="#291408" stroke-width="2.5"/>
+                  <path d="M-36,-28 Q0,-10 36,-28" fill="none" stroke="#291408" stroke-width="2.3"/>
+                  <path d="M-34,26 Q0,8 34,26" fill="none" stroke="#291408" stroke-width="2.3"/>
+                  <path d="M-12,-44 Q6,0 -12,44" fill="none" stroke="#291408" stroke-width="2.5"/>
+                </g>
+              </svg>
+            </div>
+
+            <div class="hero-info-col">
+              <div class="hero-badge-row">
+                <span class="gold-pill-badge" id="homeHoopHighBadge">🏆 HIGH SCORE: 0</span>
+                <span class="gold-pill-badge" id="homeHoopSkinBadge">🏀 SKIN: CLASSIC</span>
+              </div>
+              <h1 class="hero-title">SUPER HOOPZ 2.0</h1>
+              <p class="hero-subtitle">Arcade basketball showdown &amp; persistent career</p>
+              <button class="play-btn" onclick="openGameModal('super-hoopz')">PLAY</button>
+            </div>
+          </div>
+
+          <!-- 2x2 GAME CARDS GRID -->
+          <div class="cards-grid">
+
+            <!-- CARD 1: STAR WARS BATTLEFRONT III -->
+            <article class="game-card" onclick="openGameModal('battlefront-3')">
+              <div class="card-thumb" style="background:#1c1917;">
+                <svg viewBox="0 0 320 115" width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
+                  <defs>
+                    <linearGradient id="swSky" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stop-color="#d97706"/>
+                      <stop offset="48%" stop-color="#92400e"/>
+                      <stop offset="100%" stop-color="#292524"/>
+                    </linearGradient>
+                  </defs>
+                  <rect width="320" height="115" fill="url(#swSky)"/>
+                  <polygon points="0,115 0,72 48,60 95,78 155,66 218,80 278,55 320,68 320,115" fill="#1c1917" opacity="0.88"/>
+                  <circle cx="96" cy="54" r="10" fill="#334155"/>
+                  <path d="M82,115 L85,68 L112,68 L116,115 Z" fill="#1e293b"/>
+                  <circle cx="222" cy="56" r="10" fill="#292524"/>
+                  <path d="M204,115 L208,68 L234,68 L238,115 Z" fill="#1c1917"/>
+                  <line x1="108" y1="80" x2="188" y2="8" stroke="#60a5fa" stroke-width="4" stroke-linecap="round"/>
+                  <line x1="108" y1="80" x2="188" y2="8" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round"/>
+                  <line x1="212" y1="82" x2="132" y2="10" stroke="#f87171" stroke-width="4" stroke-linecap="round"/>
+                  <line x1="212" y1="82" x2="132" y2="10" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round"/>
+                  <circle cx="160" cy="36" r="12" fill="#ffffff" opacity="0.85"/>
+                </svg>
+              </div>
+              <div class="card-title-row">
+                <h2 class="card-title">STAR WARS BATTLEFRONT III</h2>
+                <span class="card-save-tag" id="homeSwSaveTag">WAVE 1 • 0 PTS</span>
+              </div>
+              <p class="card-desc">Galactic battles await</p>
+            </article>
+
+            <!-- CARD 2: FNAF 2026 -->
+            <article class="game-card" onclick="openGameModal('fnaf-2026')">
+              <div class="card-thumb" style="background:#090b10;">
+                <svg viewBox="0 0 320 115" width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
+                  <rect width="320" height="115" fill="#07090d"/>
+                  <rect x="18" y="14" width="66" height="52" rx="4" fill="#0f172a" stroke="#1e293b" stroke-width="2"/>
+                  <g transform="translate(160, 62)">
+                    <ellipse cx="-24" cy="-38" rx="8" ry="11" fill="#312e81"/>
+                    <ellipse cx="24" cy="-38" rx="8" ry="11" fill="#312e81"/>
+                    <ellipse cx="0" cy="-4" rx="28" ry="30" fill="#3730a3"/>
+                    <ellipse cx="0" cy="14" rx="21" ry="14" fill="#4338ca"/>
+                    <circle cx="-11" cy="-8" r="5" fill="#090d16"/>
+                    <circle cx="11" cy="-8" r="5" fill="#090d16"/>
+                    <circle cx="-11" cy="-8" r="2.2" fill="#e0f2fe"/>
+                    <circle cx="11" cy="-8" r="2.2" fill="#e0f2fe"/>
+                    <path d="M-13,22 L13,22 L10,33 L-10,33 Z" fill="#1e1b4b"/>
+                  </g>
+                </svg>
+              </div>
+              <div class="card-title-row">
+                <h2 class="card-title">FNAF 2026</h2>
+                <span class="card-save-tag" id="homeFnafSaveTag">NIGHT 1</span>
+              </div>
+              <p class="card-desc">Animatronic horror</p>
+            </article>
+
+            <!-- CARD 3: SCRATCH PROJECTS -->
+            <article class="game-card" onclick="openScratchHub()">
+              <div class="card-action-group">
+                <button
+                  type="button"
+                  class="import-pill-btn dark-pill"
+                  onclick="event.stopPropagation(); openImportModal('url');"
+                  title="Import Scratch Project URL or ID"
+                >
+                  + Import URL
+                </button>
+                <button
+                  type="button"
+                  class="import-pill-btn"
+                  onclick="event.stopPropagation(); openImportModal('sb3');"
+                  title="Upload Private .sb3 File"
+                >
+                  + Upload .sb3
+                </button>
+              </div>
+              <div class="card-thumb" style="background:#38bdf8;">
+                <svg viewBox="0 0 320 115" width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
+                  <defs>
+                    <linearGradient id="scratchSky" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stop-color="#c084fc"/>
+                      <stop offset="50%" stop-color="#38bdf8"/>
+                      <stop offset="100%" stop-color="#2563eb"/>
+                    </linearGradient>
+                  </defs>
+                  <rect width="320" height="115" fill="url(#scratchSky)"/>
+                  <g transform="translate(160, 56)">
+                    <path d="M-38,16 Q-66,14 -64,-12 Q-62,-24 -50,-16 Q-45,2 -28,6 Z" fill="#f59e0b" stroke="#1e293b" stroke-width="2.5"/>
+                    <polygon points="-28,-22 -36,-48 -10,-34" fill="#f59e0b" stroke="#1e293b" stroke-width="2.5"/>
+                    <polygon points="28,-22 36,-48 10,-34" fill="#f59e0b" stroke="#1e293b" stroke-width="2.5"/>
+                    <ellipse cx="0" cy="-12" rx="34" ry="27" fill="#f59e0b" stroke="#1e293b" stroke-width="2.5"/>
+                    <ellipse cx="0" cy="-4" rx="24" ry="16" fill="#fef3c7"/>
+                    <ellipse cx="-12" cy="-14" rx="7" ry="9" fill="#ffffff" stroke="#1e293b" stroke-width="2"/>
+                    <ellipse cx="12" cy="-14" rx="7" ry="9" fill="#ffffff" stroke="#1e293b" stroke-width="2"/>
+                    <circle cx="-10" cy="-14" r="3.5" fill="#0f172a"/>
+                    <circle cx="10" cy="-14" r="3.5" fill="#0f172a"/>
+                    <path d="M-10,-2 Q0,8 10,-2" fill="none" stroke="#1e293b" stroke-width="2.3" stroke-linecap="round"/>
+                    <circle cx="0" cy="36" r="22" fill="#ea580c" stroke="#1e293b" stroke-width="2.5"/>
+                    <path d="M-21,36 Q0,44 21,36" fill="none" stroke="#1e293b" stroke-width="2"/>
+                  </g>
+                </svg>
+              </div>
+              <div class="card-title-row">
+                <h2 class="card-title">SCRATCH PROJECTS</h2>
+                <span class="card-save-tag" id="homeScratchCountTag">2 SAVED</span>
+              </div>
+              <p class="card-desc">Block-based coding fun</p>
+            </article>
+
+            <!-- CARD 4: SCRATCH GAMES -->
+            <article class="game-card" onclick="openScratchHub()">
+              <div class="card-thumb" style="background:#f8fafc;">
+                <svg viewBox="0 0 320 115" width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
+                  <rect width="320" height="115" fill="#f1f5f9"/>
+                  <rect x="0" y="0" width="22" height="115" fill="#e2e8f0"/>
+                  <circle cx="11" cy="18" r="5" fill="#3b82f6"/>
+                  <circle cx="11" cy="36" r="5" fill="#a855f7"/>
+                  <circle cx="11" cy="54" r="5" fill="#ec4899"/>
+                  <circle cx="11" cy="72" r="5" fill="#eab308"/>
+                  <circle cx="11" cy="90" r="5" fill="#22c55e"/>
+                  <g transform="translate(30, 12)">
+                    <rect x="0" y="0" width="96" height="16" rx="4" fill="#eab308"/>
+                    <rect x="0" y="18" width="118" height="16" rx="4" fill="#3b82f6"/>
+                    <rect x="0" y="36" width="108" height="16" rx="4" fill="#a855f7"/>
+                    <rect x="0" y="54" width="128" height="16" rx="4" fill="#f97316"/>
+                    <rect x="10" y="72" width="104" height="16" rx="4" fill="#22c55e"/>
+                  </g>
+                  <rect x="208" y="12" width="102" height="58" rx="4" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+                  <circle cx="259" cy="41" r="14" fill="#f59e0b"/>
+                  <rect x="208" y="76" width="102" height="28" rx="4" fill="#e2e8f0"/>
+                </svg>
+              </div>
+              <div class="card-title-row">
+                <h2 class="card-title">SCRATCH GAMES</h2>
+                <span class="card-save-tag">CLOUD AUTO-SAVE</span>
+              </div>
+              <p class="card-desc">Scratch-compatible projects</p>
+            </article>
+
+          </div>
+        </section>
+
+        <!-- VIEW 2: GAMES LIBRARY -->
+        <section id="view-games" class="view-section">
+          <div class="section-header">
+            <div>
+              <h1 class="section-title">All Games &amp; Scratch Library</h1>
+              <p class="section-sub">Launch games, import shared Scratch URLs, or upload private .sb3 files saved only on your device</p>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <input
+                id="gameSearchInput"
+                type="text"
+                class="text-input"
+                placeholder="Search games..."
+                oninput="renderLibrary()"
+              />
+              <button type="button" class="secondary-btn-sm" onclick="openImportModal('url')">+ Import URL</button>
+              <button type="button" class="play-btn play-btn-sm" onclick="openImportModal('sb3')">+ Upload .sb3</button>
+            </div>
+          </div>
+
+          <div class="filter-row">
+            <button id="filterAllBtn" class="filter-tab active" onclick="setLibraryFilter('all')">All Games</button>
+            <button id="filterScratchBtn" class="filter-tab" onclick="setLibraryFilter('scratch')">
+              Scratch &amp; Private .sb3 (<span id="scratchCountBadge">0</span>)
+            </button>
+          </div>
+
+          <div id="libraryGrid" class="library-list"></div>
+        </section>
+
+        <!-- VIEW 3: UPDATES -->
+        <section id="view-updates" class="view-section">
+          <div class="section-header">
+            <div>
+              <h1 class="section-title">Patch Notes &amp; Updates</h1>
+              <p class="section-sub">Latest ALL STAR ARCADE builds and feature drops</p>
+            </div>
+          </div>
+
+          <div class="hero-card" style="margin-bottom:16px; display:block;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <span style="background:rgba(250,204,21,0.2); color:#fde047; font-size:11px; font-weight:800; padding:3px 10px; border-radius:99px;">LATEST • v3.0.0</span>
+              <span style="font-size:11px; color:#9ca3af;">November 25, 2026</span>
+            </div>
+            <h2 style="font-size:16px; font-weight:800; margin-bottom:8px;">Universal Save Manager, Native .sb3 Runner &amp; Full Playable Arcade</h2>
+            <ul style="font-size:12px; color:#9ca3af; padding-left:18px; line-height:1.7;">
+              <li>Added automatic <strong>Persistent Save Data</strong> across every game (Super Hoopz 2.0 career &amp; skins, Battlefront III waves, FNAF 2026 nights, and Scratch cloud variables).</li>
+              <li>Integrated native <strong>@turbowarp/scaffolding</strong> runner so local <strong>.sb3 files</strong> execute directly from private IndexedDB storage without blank iframe errors.</li>
+              <li>Added <strong>Save Codes Drawer</strong> inside the game player plus full <strong>.json Save Backup Export/Import</strong> in Settings.</li>
+            </ul>
+          </div>
+
+          <div class="panel-box" style="padding:18px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <span style="background:rgba(255,255,255,0.08); color:#d1d5db; font-size:11px; font-weight:700; padding:3px 10px; border-radius:99px;">v2.8.0</span>
+              <span style="font-size:11px; color:#9ca3af;">November 2026</span>
+            </div>
+            <h2 style="font-size:15px; font-weight:700; margin-bottom:6px;">Custom Stage Resolutions (640×480) &amp; Sunset Mode</h2>
+            <p style="font-size:12px; color:#9ca3af;">Added live stage dimension controls, native Full Screen theater mode, and twilight Sunset Mode.</p>
+          </div>
+        </section>
+
+        <!-- VIEW 4: SETTINGS -->
+        <section id="view-settings" class="view-section">
+          <div class="section-header">
+            <div>
+              <h1 class="section-title">Launcher Settings &amp; Save Data</h1>
+              <p class="section-sub">Customize appearance, stage sizes, and manage your persistent game save files</p>
+            </div>
+          </div>
+
+          <!-- SAVE DATA & PROGRESS CARD -->
+          <div class="panel-box">
+            <div class="setting-row" style="background:rgba(250, 204, 21, 0.06);">
+              <div>
+                <div style="font-size:15px; font-weight:800; color:#fde047;">💾 Save Data &amp; Progress Manager</div>
+                <div style="font-size:12px; color:#9ca3af; margin-top:2px;">All game progress and Scratch cloud variables auto-save locally to your browser</div>
+              </div>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <button type="button" class="play-btn play-btn-sm" onclick="exportAllSaveData()">⬇ Export Save Data (.json)</button>
+                <button type="button" class="secondary-btn-sm" onclick="document.getElementById('importSaveJsonInput').click()">⬆ Import Backup (.json)</button>
+                <input id="importSaveJsonInput" type="file" accept=".json,application/json" style="display:none;" onchange="importAllSaveData(this)" />
+              </div>
+            </div>
+
+            <div id="settingsSaveSummaryList"></div>
+          </div>
+
+          <!-- APPEARANCE & ENGINE SETTINGS -->
+          <div class="panel-box">
+            <div class="setting-row">
+              <div>
+                <div style="font-size:14px; font-weight:700;">Appearance &amp; Background Mode</div>
+                <div style="font-size:12px; color:#9ca3af; margin-top:2px;">Switch between obsidian Dark Mode or twilight Sunset Mode</div>
+              </div>
+              <div class="theme-switcher">
+                <button id="themeBtnDark" type="button" class="theme-choice-btn active" onclick="setBackgroundTheme('dark')">
+                  <span style="width:10px; height:10px; border-radius:50%; background:#0d0e11; border:1px solid rgba(255,255,255,0.4);"></span>
+                  <span>Dark Mode</span>
+                </button>
+                <button id="themeBtnSunset" type="button" class="theme-choice-btn" onclick="setBackgroundTheme('sunset')">
+                  <span style="width:10px; height:10px; border-radius:50%; background:linear-gradient(135deg,#ea580c,#db2777,#4c1d95);"></span>
+                  <span>Sunset Mode</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="setting-row">
+              <div>
+                <div style="font-size:14px; font-weight:700;">Default Stage Size</div>
+                <div style="font-size:12px; color:#9ca3af; margin-top:2px;">Default resolution when opening games and Scratch projects</div>
+              </div>
+              <select id="defaultStageSelect" class="select-input" onchange="updateDefaultStage(this.value)">
+                <option value="640x480">640 × 480 (4:3 HD)</option>
+                <option value="480x360">480 × 360 (Classic Scratch)</option>
+                <option value="640x360">640 × 360 (16:9 Widescreen)</option>
+                <option value="720x480">720 × 480 (Arcade Wide)</option>
+              </select>
+            </div>
+
+            <div class="setting-row">
+              <div>
+                <div style="font-size:14px; font-weight:700;">Default Scratch URL Engine</div>
+                <div style="font-size:12px; color:#9ca3af; margin-top:2px;">Run shared Scratch URLs with TurboWarp (60 FPS) or Official Scratch</div>
+              </div>
+              <select id="defaultEngineSelect" class="select-input" onchange="updateDefaultEngine(this.value)">
+                <option value="turbowarp">TurboWarp (60 FPS)</option>
+                <option value="scratch">Official Scratch</option>
+              </select>
+            </div>
+
+            <div class="setting-row">
+              <div>
+                <div style="font-size:14px; font-weight:700;">Featured Card Yellow Glow</div>
+                <div style="font-size:12px; color:#9ca3af; margin-top:2px;">Ambient yellow border glow on SUPER HOOPZ 2.0</div>
+              </div>
+              <button id="glowToggleBtn" type="button" class="toggle-switch" onclick="toggleGlow()">
+                <span class="toggle-knob"></span>
+              </button>
+            </div>
+
+            <div class="setting-row">
+              <div>
+                <div style="font-size:14px; font-weight:700;">Arcade Sound Effects</div>
+                <div style="font-size:12px; color:#9ca3af; margin-top:2px;">Synthesized arcade audio &amp; UI feedback</div>
+              </div>
+              <button id="soundToggleBtn" type="button" class="toggle-switch" onclick="toggleSound()">
+                <span class="toggle-knob"></span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- GAME / SCRATCH THEATER MODAL -->
+  <div id="gameModal" class="modal-backdrop" onclick="if(event.target === this) closeGameModal()">
+    <div id="theaterModalCard" class="modal-card">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <span style="width:10px; height:10px; border-radius:50%; background:#facc15; box-shadow:0 0 8px #facc15;"></span>
+          <h3 id="modalGameTitle" style="font-size:14px; font-weight:800; text-transform:uppercase;">SUPER HOOPZ 2.0</h3>
+          <span id="modalPrivateTag" style="display:none; font-size:10px; font-weight:800; padding:2px 7px; border-radius:99px; background:rgba(250,204,21,0.18); color:#fde047;">🔒 Private .sb3</span>
+          <span id="modalSaveStatus" class="save-status-pill">● Saved</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+          <div id="modalScaffoldingControls" style="display:none; gap:4px;">
+            <button type="button" class="modal-close-btn" style="background:#16a34a; color:#fff; border-color:#22c55e;" onclick="triggerScaffoldingGreenFlag()" title="Green Flag Start">▶ Flag</button>
+            <button type="button" class="modal-close-btn" style="background:#dc2626; color:#fff; border-color:#ef4444;" onclick="triggerScaffoldingStop()" title="Stop All">■ Stop</button>
+          </div>
+          <div id="modalEngineSwitch" style="display:flex; gap:5px;"></div>
+          <button type="button" class="modal-close-btn" onclick="toggleSaveDrawer()" title="Open Save Codes & State Notes">💾 Save Codes</button>
+          <button id="fullscreenBtn" type="button" class="modal-close-btn" style="background:#facc15; color:#111214; border-color:#facc15;" onclick="toggleTheaterFullscreen()">⛶ Full Screen</button>
+          <button type="button" class="modal-close-btn" onclick="closeGameModal()">Close</button>
+        </div>
+      </div>
+
+      <div id="modalBody" class="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- IMPORT SCRATCH URL OR PRIVATE .SB3 MODAL -->
+  <div id="importModal" class="modal-backdrop" onclick="if(event.target === this) closeImportModal()">
+    <div class="modal-card narrow">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="width:10px; height:10px; border-radius:50%; background:#facc15;"></span>
+          <h3 style="font-size:14px; font-weight:800; text-transform:uppercase;">Import Scratch Project</h3>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeImportModal()">Close</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Mode Switch Tabs -->
+        <div class="theme-switcher" style="margin-bottom:14px; width:100%;">
+          <button id="tabBtnSb3" type="button" class="theme-choice-btn active" style="flex:1; justify-content:center;" onclick="switchImportTab('sb3')">
+            🔒 Upload .sb3 File (Private)
+          </button>
+          <button id="tabBtnUrl" type="button" class="theme-choice-btn" style="flex:1; justify-content:center;" onclick="switchImportTab('url')">
+            🔗 Scratch URL / ID
+          </button>
+        </div>
+
+        <!-- FORM A: PRIVATE .SB3 FILE UPLOAD -->
+        <form id="formImportSb3" onsubmit="handleSb3Submit(event)">
+          <div class="private-badge">
+            <span>🔒 Saved privately in your browser's local IndexedDB — only you can access it</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Select Your .sb3 File *</label>
+            <div class="file-drop-zone" onclick="document.getElementById('sb3FileInput').click()">
+              <div style="font-size:13px; font-weight:800; color:#fde047; margin-bottom:4px;">Click to Choose .sb3 Project File</div>
+              <div id="sb3FileLabel" style="font-size:11.5px; color:#9ca3af;">Supports Scratch 3.0 (.sb3) &amp; Scratch 2.0 (.sb2) files</div>
+              <input
+                id="sb3FileInput"
+                type="file"
+                accept=".sb3,.sb2,application/x.scratch.sb3"
+                style="display:none;"
+                onchange="handleSb3FileChosen(this)"
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Project Title (Optional — auto-fills from filename)</label>
+            <input
+              id="sb3TitleInput"
+              type="text"
+              class="text-input"
+              style="width:100%;"
+              maxlength="44"
+              placeholder="e.g. My Secret Platformer"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">TurboWarp Custom Extensions (URLs, Presets, or Local .js File)</label>
+            <div style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom:7px;">
+              <button type="button" class="size-pill" onclick="appendPresetExtension('https://extensions.turbowarp.org/gamepad.js')">+ Gamepad</button>
+              <button type="button" class="size-pill" onclick="appendPresetExtension('https://extensions.turbowarp.org/pen-plus.js')">+ Pen+</button>
+              <button type="button" class="size-pill" onclick="appendPresetExtension('https://extensions.turbowarp.org/utilities.js')">+ Utilities</button>
+              <button type="button" class="size-pill" onclick="appendPresetExtension('https://extensions.turbowarp.org/stretch.js')">+ Stretch</button>
+              <button type="button" class="size-pill" onclick="appendPresetExtension('https://extensions.turbowarp.org/box2d.js')">+ Box2D</button>
+            </div>
+            <textarea
+              id="sb3ExtensionUrls"
+              class="text-input"
+              rows="2"
+              style="width:100%; resize:vertical; user-select:text;"
+              placeholder="Paste extension URLs (one per line) OR paste raw JavaScript code directly..."
+            ></textarea>
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:6px; flex-wrap:wrap;">
+              <button type="button" class="secondary-btn-sm" style="padding:5px 10px; font-size:11px;" onclick="document.getElementById('sb3JsFileInput').click()">
+                📄 Upload Local .js Extension
+              </button>
+              <span id="sb3JsFileLabel" style="font-size:11px; color:#9ca3af;">No local .js file attached</span>
+              <input id="sb3JsFileInput" type="file" accept=".js,text/javascript,application/javascript" style="display:none;" onchange="handleJsExtensionFileChosen(this)" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Custom Stage Size</label>
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+              <select id="sb3StagePreset" class="select-input" style="flex:1;" onchange="applyPresetToInputs('sb3', this.value)">
+                <option value="640x480">640 × 480 (4:3 HD)</option>
+                <option value="480x360">480 × 360 (Classic Scratch)</option>
+                <option value="640x360">640 × 360 (16:9 Widescreen)</option>
+                <option value="720x480">720 × 480 (Arcade Wide)</option>
+                <option value="custom">Custom Dimensions...</option>
+              </select>
+              <input id="sb3WidthInput" type="number" class="dim-input" value="640" min="240" max="1920" />
+              <span style="font-size:11px; color:#9ca3af;">×</span>
+              <input id="sb3HeightInput" type="number" class="dim-input" value="480" min="180" max="1080" />
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
+            <button type="button" class="modal-close-btn" onclick="closeImportModal()">Cancel</button>
+            <button type="submit" class="play-btn play-btn-sm">Save &amp; Launch .sb3</button>
+          </div>
+        </form>
+
+        <!-- FORM B: SCRATCH URL / ID -->
+        <form id="formImportUrl" style="display:none;" onsubmit="handleUrlSubmit(event)">
+          <div class="form-group">
+            <label class="form-label">Scratch Project URL or Numeric ID *</label>
+            <input
+              id="scratchUrlInput"
+              type="text"
+              class="text-input"
+              style="width:100%;"
+              placeholder="e.g. https://scratch.mit.edu/projects/10128407/ or 10128407"
+              oninput="previewExtractedId(this.value)"
+            />
+            <div id="extractedIdStatus" style="font-size:11px; color:#9ca3af; margin-top:4px;">
+              Paste any shared Scratch link or project ID number.
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Game Title *</label>
+            <input
+              id="scratchTitleInput"
+              type="text"
+              class="text-input"
+              style="width:100%;"
+              maxlength="44"
+              placeholder="e.g. Scratch Basketball"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Custom Stage Size</label>
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+              <select id="urlStagePreset" class="select-input" style="flex:1;" onchange="applyPresetToInputs('url', this.value)">
+                <option value="640x480">640 × 480 (4:3 HD)</option>
+                <option value="480x360">480 × 360 (Classic Scratch)</option>
+                <option value="640x360">640 × 360 (16:9 Widescreen)</option>
+                <option value="720x480">720 × 480 (Arcade Wide)</option>
+                <option value="custom">Custom Dimensions...</option>
+              </select>
+              <input id="urlWidthInput" type="number" class="dim-input" value="640" min="240" max="1920" />
+              <span style="font-size:11px; color:#9ca3af;">×</span>
+              <input id="urlHeightInput" type="number" class="dim-input" value="480" min="180" max="1080" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Player Engine</label>
+            <select id="scratchEngineInput" class="select-input" style="width:100%;">
+              <option value="turbowarp">TurboWarp (60 FPS Fast)</option>
+              <option value="scratch">Official Scratch Embed</option>
+            </select>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
+            <button type="button" class="modal-close-btn" onclick="closeImportModal()">Cancel</button>
+            <button type="submit" class="play-btn play-btn-sm">Add &amp; Play</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toastBox" class="toast-box">Notification</div>
+
+  <script>
+    // Safe localStorage wrapper for sandboxed previews
+    const safeStorage = {
+      get(key, fallback) {
+        try {
+          const val = window.localStorage.getItem(key);
+          return val !== null ? val : fallback;
+        } catch (e) {
+          return fallback;
+        }
+      },
+      set(key, value) {
+        try {
+          window.localStorage.setItem(key, value);
+        } catch (e) {
+          // Ignore storage restrictions
+        }
+      }
+    };
+
+    // Private Browser-Only IndexedDB Vault for .sb3 Binary Blobs
+    const sb3Vault = {
+      dbName: 'AllStarArcadePrivateDB',
+      storeName: 'sb3Files',
+      memoryFallback: new Map(),
+
+      open() {
+        return new Promise((resolve, reject) => {
+          try {
+            if (!window.indexedDB) {
+              reject(new Error('IndexedDB unavailable'));
+              return;
+            }
+            const req = window.indexedDB.open(this.dbName, 1);
+            req.onupgradeneeded = (ev) => {
+              const db = ev.target.result;
+              if (!db.objectStoreNames.contains(this.storeName)) {
+                db.createObjectStore(this.storeName);
+              }
+            };
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error);
+          } catch (err) {
+            reject(err);
+          }
+        });
+      },
+
+      async saveFile(id, arrayBuffer, fileName) {
+        this.memoryFallback.set(id, { buffer: arrayBuffer, name: fileName });
+        try {
+          const db = await this.open();
+          return new Promise((resolve) => {
+            const tx = db.transaction(this.storeName, 'readwrite');
+            tx.objectStore(this.storeName).put({ buffer: arrayBuffer, name: fileName }, id);
+            tx.oncomplete = () => resolve(true);
+            tx.onerror = () => resolve(false);
+          });
+        } catch (e) {
+          return false;
+        }
+      },
+
+      async getFile(id) {
+        if (this.memoryFallback.has(id)) {
+          return this.memoryFallback.get(id);
+        }
+        try {
+          const db = await this.open();
+          return new Promise((resolve) => {
+            const tx = db.transaction(this.storeName, 'readonly');
+            const req = tx.objectStore(this.storeName).get(id);
+            req.onsuccess = () => resolve(req.result || null);
+            req.onerror = () => resolve(null);
+          });
+        } catch (e) {
+          return null;
+        }
+      },
+
+      async deleteFile(id) {
+        this.memoryFallback.delete(id);
+        try {
+          const db = await this.open();
+          const tx = db.transaction(this.storeName, 'readwrite');
+          tx.objectStore(this.storeName).delete(id);
+        } catch (e) {
+          // Ignore
+        }
+      }
+    };
+
+    // Universal Save Manager for ALL Games & Scratch Save Codes
+    const SAVE_DATA_KEY = 'allstar_arcade_savedata_v1';
+    const STORAGE_KEY = 'allstar_arcade_scratch_v3';
+    const THEME_KEY = 'allstar_arcade_theme_v3';
+    const ENGINE_KEY = 'allstar_arcade_engine_v3';
+    const STAGE_KEY = 'allstar_arcade_stage_v3';
+
+    function getDefaultSaveData() {
+      return {
+        hoopz: {
+          highScore: 0,
+          bestStreak: 0,
+          totalBaskets: 0,
+          selectedSkin: 'classic',
+          unlockedSkins: ['classic']
+        },
+        battlefront: {
+          highScore: 0,
+          highestWave: 1,
+          shipsDefeated: 0
+        },
+        fnaf: {
+          currentNight: 1,
+          bestSurvivalSec: 0,
+          nightsSurvived: 0
+        },
+        scratchNotes: {} // gameId -> [ { label, code, updatedAt } ]
+      };
+    }
+
+    function loadSaveData() {
+      try {
+        const raw = safeStorage.get(SAVE_DATA_KEY, null);
+        if (!raw) return getDefaultSaveData();
+        const parsed = JSON.parse(raw);
+        const def = getDefaultSaveData();
+        return {
+          hoopz: { ...def.hoopz, ...(parsed.hoopz || {}) },
+          battlefront: { ...def.battlefront, ...(parsed.battlefront || {}) },
+          fnaf: { ...def.fnaf, ...(parsed.fnaf || {}) },
+          scratchNotes: parsed.scratchNotes || {}
+        };
+      } catch (e) {
+        return getDefaultSaveData();
+      }
+    }
+
+    let gameSaves = loadSaveData();
+
+    function persistSaveData(silent) {
+      safeStorage.set(SAVE_DATA_KEY, JSON.stringify(gameSaves));
+      refreshHomeBadges();
+      renderSettingsSaveSummary();
+      if (!silent) {
+        const pill = document.getElementById('modalSaveStatus');
+        if (pill) {
+          pill.textContent = '● Saving...';
+          setTimeout(() => {
+            if (pill) pill.textContent = '● Saved';
+          }, 450);
+        }
+      }
+    }
+
+    let currentTheme = safeStorage.get(THEME_KEY, 'dark');
+    let defaultEngine = safeStorage.get(ENGINE_KEY, 'turbowarp');
+    let defaultStage = safeStorage.get(STAGE_KEY, '640x480');
+    let currentFilter = 'all';
+    let glowEnabled = true;
+    let soundEnabled = true;
+    let activeLoopId = null;
+    let activeKeyHandlers = [];
+    let activeModalGame = null;
+    let activeScaffolding = null;
+    let activeStageW = 640;
+    let activeStageH = 480;
+    let pendingSb3File = null;
+    let pendingJsExtensionText = '';
+    let pendingJsExtensionName = '';
+    let activeExtensionBlobUrls = [];
+
+    const builtInGames = [
+      {
+        id: 'super-hoopz',
+        title: 'SUPER HOOPZ 2.0',
+        subtitle: 'Arcade basketball showdown & persistent career',
+        genre: 'Arcade Sports',
+        isScratch: false
+      },
+      {
+        id: 'battlefront-3',
+        title: 'STAR WARS BATTLEFRONT III',
+        subtitle: 'Galactic battles await',
+        genre: 'Sci-Fi Space Blaster',
+        isScratch: false
+      },
+      {
+        id: 'fnaf-2026',
+        title: 'FNAF 2026',
+        subtitle: 'Animatronic horror',
+        genre: 'Security Monitor Survival',
+        isScratch: false
+      }
+    ];
+
+    const defaultScratchGames = [
+      {
+        id: 'scratch-sample-1',
+        title: 'SCRATCH PROJECTS: BALL BOUNCE',
+        subtitle: 'Block-based coding fun',
+        scratchId: '10128407',
+        engine: 'turbowarp',
+        stageW: 640,
+        stageH: 480,
+        isScratch: true,
+        isPrivateSb3: false,
+        isCustom: false
+      },
+      {
+        id: 'scratch-sample-2',
+        title: 'SCRATCH GAMES: PLATFORMER',
+        subtitle: 'Scratch-compatible projects',
+        scratchId: '60917032',
+        engine: 'turbowarp',
+        stageW: 640,
+        stageH: 480,
+        isScratch: true,
+        isPrivateSb3: false,
+        isCustom: false
+      }
+    ];
+
+    function loadScratchProjects() {
+      try {
+        const raw = safeStorage.get(STORAGE_KEY, null);
+        if (!raw) return [...defaultScratchGames];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) && parsed.length ? parsed : [...defaultScratchGames];
+      } catch (e) {
+        return [...defaultScratchGames];
+      }
+    }
+
+    let scratchProjects = loadScratchProjects();
+
+    function saveScratchProjects() {
+      safeStorage.set(STORAGE_KEY, JSON.stringify(scratchProjects));
+      refreshHomeBadges();
+    }
+
+    function getAllGames() {
+      return [...builtInGames, ...scratchProjects];
+    }
+
+    function refreshHomeBadges() {
+      const hoopHighEl = document.getElementById('homeHoopHighBadge');
+      const hoopSkinEl = document.getElementById('homeHoopSkinBadge');
+      const swTagEl = document.getElementById('homeSwSaveTag');
+      const fnafTagEl = document.getElementById('homeFnafSaveTag');
+      const scratchCountEl = document.getElementById('homeScratchCountTag');
+
+      if (hoopHighEl) hoopHighEl.textContent = `🏆 HIGH SCORE: ${gameSaves.hoopz.highScore}`;
+      if (hoopSkinEl) hoopSkinEl.textContent = `🏀 SKIN: ${gameSaves.hoopz.selectedSkin.toUpperCase()}`;
+      if (swTagEl) swTagEl.textContent = `WAVE ${gameSaves.battlefront.highestWave} • ${gameSaves.battlefront.highScore} PTS`;
+      if (fnafTagEl) fnafTagEl.textContent = `NIGHT ${gameSaves.fnaf.currentNight}`;
+      if (scratchCountEl) scratchCountEl.textContent = `${scratchProjects.length} SAVED`;
+    }
+
+    // Navigation
+    function switchView(viewName) {
+      document.querySelectorAll('.view-section').forEach((sec) => sec.classList.remove('active'));
+      const target = document.getElementById('view-' + viewName);
+      if (target) target.classList.add('active');
+
+      document.querySelectorAll('.nav-btn').forEach((btn) => {
+        btn.classList.toggle('active', btn.getAttribute('data-nav') === viewName);
+      });
+
+      if (viewName === 'games') {
+        renderLibrary();
+      } else if (viewName === 'settings') {
+        renderSettingsSaveSummary();
+      }
+    }
+
+    function openScratchHub() {
+      switchView('games');
+      setLibraryFilter('scratch');
+    }
+
+    document.getElementById('windowCloseBtn').addEventListener('click', () => {
+      switchView('home');
+      showToast('Returned to ALL STAR ARCADE Home');
+    });
+
+    // Background Theme (Dark Mode vs Sunset Mode)
+    function setBackgroundTheme(theme, silent) {
+      currentTheme = theme === 'sunset' ? 'sunset' : 'dark';
+      safeStorage.set(THEME_KEY, currentTheme);
+
+      document.body.classList.toggle('theme-sunset', currentTheme === 'sunset');
+
+      const darkBtn = document.getElementById('themeBtnDark');
+      const sunsetBtn = document.getElementById('themeBtnSunset');
+      if (darkBtn && sunsetBtn) {
+        darkBtn.classList.toggle('active', currentTheme === 'dark');
+        sunsetBtn.classList.toggle('active', currentTheme === 'sunset');
+      }
+
+      if (!silent) {
+        playBeep(currentTheme === 'sunset' ? 620 : 460, 0.07);
+        showToast(currentTheme === 'sunset' ? 'Sunset Mode activated' : 'Dark Mode activated');
+      }
+    }
+
+    function updateDefaultStage(val) {
+      defaultStage = val;
+      safeStorage.set(STAGE_KEY, val);
+      showToast('Default stage resolution set to ' + val);
+    }
+
+    function updateDefaultEngine(val) {
+      defaultEngine = val;
+      safeStorage.set(ENGINE_KEY, val);
+      showToast('Default Scratch engine saved');
+    }
+
+    function toggleGlow() {
+      glowEnabled = !glowEnabled;
+      const btn = document.getElementById('glowToggleBtn');
+      const hero = document.getElementById('featuredHeroCard');
+      if (btn) btn.classList.toggle('off', !glowEnabled);
+      if (hero) hero.classList.toggle('no-glow', !glowEnabled);
+      playBeep(glowEnabled ? 600 : 400, 0.06);
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      const btn = document.getElementById('soundToggleBtn');
+      if (btn) btn.classList.toggle('off', !soundEnabled);
+      if (soundEnabled) playBeep(640, 0.06);
+    }
+
+    // Settings Save Summary & Backup Export/Import
+    function renderSettingsSaveSummary() {
+      const container = document.getElementById('settingsSaveSummaryList');
+      if (!container) return;
+
+      const totalCodes = Object.values(gameSaves.scratchNotes || {}).reduce((acc, arr) => acc + (Array.isArray(arr) ? arr.length : 0), 0);
+
+      container.innerHTML = `
+        <div class="setting-row">
+          <div>
+            <div style="font-size:13.5px; font-weight:800;">🏀 SUPER HOOPZ 2.0</div>
+            <div style="font-size:11.5px; color:#9ca3af; margin-top:2px;">
+              High Score: <strong style="color:#fde047;">${gameSaves.hoopz.highScore}</strong> •
+              Best Streak: <strong style="color:#fff;">${gameSaves.hoopz.bestStreak}</strong> •
+              Total Baskets: <strong style="color:#fff;">${gameSaves.hoopz.totalBaskets}</strong> •
+              Skins Unlocked: <strong style="color:#fde047;">${gameSaves.hoopz.unlockedSkins.length}/3</strong>
+            </div>
+          </div>
+          <button type="button" class="modal-close-btn" onclick="resetSingleGameSave('hoopz')">Reset Save</button>
+        </div>
+
+        <div class="setting-row">
+          <div>
+            <div style="font-size:13.5px; font-weight:800;">⚔️ STAR WARS BATTLEFRONT III</div>
+            <div style="font-size:11.5px; color:#9ca3af; margin-top:2px;">
+              High Score: <strong style="color:#fde047;">${gameSaves.battlefront.highScore}</strong> •
+              Highest Wave: <strong style="color:#fff;">Wave ${gameSaves.battlefront.highestWave}</strong> •
+              Ships Defeated: <strong style="color:#fff;">${gameSaves.battlefront.shipsDefeated}</strong>
+            </div>
+          </div>
+          <button type="button" class="modal-close-btn" onclick="resetSingleGameSave('battlefront')">Reset Save</button>
+        </div>
+
+        <div class="setting-row">
+          <div>
+            <div style="font-size:13.5px; font-weight:800;">👁️ FNAF 2026</div>
+            <div style="font-size:11.5px; color:#9ca3af; margin-top:2px;">
+              Current Night: <strong style="color:#fde047;">Night ${gameSaves.fnaf.currentNight}</strong> •
+              Nights Survived: <strong style="color:#fff;">${gameSaves.fnaf.nightsSurvived}</strong> •
+              Best Shift: <strong style="color:#fff;">${gameSaves.fnaf.bestSurvivalSec}s</strong>
+            </div>
+          </div>
+          <button type="button" class="modal-close-btn" onclick="resetSingleGameSave('fnaf')">Reset Save</button>
+        </div>
+
+        <div class="setting-row">
+          <div>
+            <div style="font-size:13.5px; font-weight:800;">🐱 Scratch &amp; .sb3 Cloud Data</div>
+            <div style="font-size:11.5px; color:#9ca3af; margin-top:2px;">
+              Projects Imported: <strong style="color:#fde047;">${scratchProjects.length}</strong> •
+              Saved State Codes: <strong style="color:#fff;">${totalCodes}</strong> •
+              TurboWarp Cloud Variables: <strong style="color:#4ade80;">Active</strong>
+            </div>
+          </div>
+          <button type="button" class="modal-close-btn" onclick="resetSingleGameSave('scratchNotes')">Clear Save Codes</button>
+        </div>
+      `;
+    }
+
+    function resetSingleGameSave(key) {
+      const def = getDefaultSaveData();
+      gameSaves[key] = def[key];
+      persistSaveData(false);
+      showToast('Save data reset');
+    }
+
+    function exportAllSaveData() {
+      const backup = {
+        app: 'ALL STAR ARCADE',
+        exportedAt: new Date().toISOString(),
+        gameSaves: gameSaves,
+        scratchProjects: scratchProjects
+      };
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `all-star-arcade-saves-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      showToast('Exported all game save data (.json)');
+    }
+
+    function importAllSaveData(input) {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(String(reader.result || '{}'));
+          if (parsed.gameSaves) {
+            const def = getDefaultSaveData();
+            gameSaves = {
+              hoopz: { ...def.hoopz, ...(parsed.gameSaves.hoopz || {}) },
+              battlefront: { ...def.battlefront, ...(parsed.gameSaves.battlefront || {}) },
+              fnaf: { ...def.fnaf, ...(parsed.gameSaves.fnaf || {}) },
+              scratchNotes: parsed.gameSaves.scratchNotes || {}
+            };
+            persistSaveData(false);
+          }
+          if (Array.isArray(parsed.scratchProjects) && parsed.scratchProjects.length) {
+            scratchProjects = parsed.scratchProjects;
+            saveScratchProjects();
+            renderLibrary();
+          }
+          showToast('Save data backup restored!');
+        } catch (err) {
+          showToast('Invalid save backup JSON file');
+        }
+      };
+      reader.readAsText(file);
+      input.value = '';
+    }
+
+    // Library Rendering & Filtering
+    function setLibraryFilter(filter) {
+      currentFilter = filter;
+      document.getElementById('filterAllBtn').classList.toggle('active', filter === 'all');
+      document.getElementById('filterScratchBtn').classList.toggle('active', filter === 'scratch');
+      renderLibrary();
+    }
+
+    function renderLibrary() {
+      const grid = document.getElementById('libraryGrid');
+      const badge = document.getElementById('scratchCountBadge');
+      const searchInput = document.getElementById('gameSearchInput');
+      const query = (searchInput ? searchInput.value : '').trim().toLowerCase();
+
+      if (badge) badge.textContent = String(scratchProjects.length);
+
+      let items = getAllGames();
+      if (currentFilter === 'scratch') {
+        items = items.filter((g) => g.isScratch);
+      }
+      if (query) {
+        items = items.filter((g) =>
+          g.title.toLowerCase().includes(query) ||
+          g.subtitle.toLowerCase().includes(query) ||
+          (g.scratchId && g.scratchId.includes(query))
+        );
+      }
+
+      if (!items.length) {
+        grid.innerHTML = `
+          <div class="panel-box" style="grid-column:1/-1; padding:28px; text-align:center;">
+            <p style="font-size:13px; color:#9ca3af; margin-bottom:12px;">No matching games found.</p>
+            <button type="button" class="play-btn play-btn-sm" onclick="openImportModal('sb3')">+ Upload Private .sb3</button>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = items.map((g) => {
+        const badgeText = g.isPrivateSb3
+          ? '🔒 Private .sb3'
+          : (g.isScratch ? 'ID: ' + escapeHtml(g.scratchId) : '● Saved');
+        const stageTag = (g.stageW && g.stageH) ? `${g.stageW}×${g.stageH}` : '';
+
+        return `
+          <div class="game-card" style="flex-direction:row; align-items:center; justify-content:space-between; gap:12px;" onclick="openGameModal('${g.id}')">
+            <div style="min-width:0;">
+              <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                <h3 class="card-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(g.title)}</h3>
+                ${badgeText ? `<span style="font-size:10px; font-weight:700; padding:2px 6px; border-radius:4px; background:rgba(250,204,21,0.18); color:#fde047;">${badgeText}</span>` : ''}
+                ${stageTag ? `<span style="font-size:10px; font-weight:700; padding:2px 6px; border-radius:4px; background:rgba(255,255,255,0.08); color:#cbd5e1;">${stageTag}</span>` : ''}
+              </div>
+              <p class="card-desc">${escapeHtml(g.subtitle)}</p>
+            </div>
+            <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+              ${g.isCustom ? `
+                <button
+                  type="button"
+                  class="modal-close-btn"
+                  title="Delete project"
+                  onclick="event.stopPropagation(); deleteScratchProject('${g.id}')"
+                >✕</button>
+              ` : ''}
+              <button type="button" class="play-btn play-btn-sm">PLAY</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Import Modal Controls (Private .sb3 + Scratch URL/ID)
+    function switchImportTab(mode) {
+      const isSb3 = mode === 'sb3';
+      document.getElementById('tabBtnSb3').classList.toggle('active', isSb3);
+      document.getElementById('tabBtnUrl').classList.toggle('active', !isSb3);
+      document.getElementById('formImportSb3').style.display = isSb3 ? 'block' : 'none';
+      document.getElementById('formImportUrl').style.display = isSb3 ? 'none' : 'block';
+    }
+
+    function applyPresetToInputs(prefix, preset) {
+      if (preset === 'custom') return;
+      const parts = preset.split('x');
+      if (parts.length === 2) {
+        document.getElementById(prefix + 'WidthInput').value = parts[0];
+        document.getElementById(prefix + 'HeightInput').value = parts[1];
+      }
+    }
+
+    function openImportModal(defaultTab) {
+      pendingSb3File = null;
+      pendingJsExtensionText = '';
+      pendingJsExtensionName = '';
+      document.getElementById('sb3FileInput').value = '';
+      document.getElementById('sb3FileLabel').textContent = 'Supports Scratch 3.0 (.sb3) & Scratch 2.0 (.sb2) files';
+      document.getElementById('sb3TitleInput').value = '';
+      const sb3ExtensionInput = document.getElementById('sb3ExtensionUrls');
+      if (sb3ExtensionInput) sb3ExtensionInput.value = '';
+      const jsInput = document.getElementById('sb3JsFileInput');
+      if (jsInput) jsInput.value = '';
+      const jsLabel = document.getElementById('sb3JsFileLabel');
+      if (jsLabel) jsLabel.textContent = 'No local .js file attached';
+
+      document.getElementById('scratchUrlInput').value = '';
+      document.getElementById('scratchTitleInput').value = '';
+      document.getElementById('scratchEngineInput').value = defaultEngine;
+      previewExtractedId('');
+
+      const [dw, dh] = defaultStage.split('x');
+      document.getElementById('sb3StagePreset').value = defaultStage;
+      document.getElementById('sb3WidthInput').value = dw || 640;
+      document.getElementById('sb3HeightInput').value = dh || 480;
+
+      document.getElementById('urlStagePreset').value = defaultStage;
+      document.getElementById('urlWidthInput').value = dw || 640;
+      document.getElementById('urlHeightInput').value = dh || 480;
+
+      switchImportTab(defaultTab || 'sb3');
+      document.getElementById('importModal').classList.add('open');
+      playBeep(540, 0.06);
+    }
+
+    function closeImportModal() {
+      document.getElementById('importModal').classList.remove('open');
+    }
+
+    function handleSb3FileChosen(input) {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      pendingSb3File = file;
+      const sizeKb = Math.max(1, Math.round(file.size / 1024));
+      document.getElementById('sb3FileLabel').textContent = `✓ Selected: ${file.name} (${sizeKb} KB)`;
+      const titleInput = document.getElementById('sb3TitleInput');
+      if (!titleInput.value.trim()) {
+        titleInput.value = file.name.replace(/\.(sb3|sb2)$/i, '');
+      }
+    }
+
+    function appendPresetExtension(url) {
+      const box = document.getElementById('sb3ExtensionUrls');
+      if (!box) return;
+      const current = box.value.trim();
+      if (current.includes(url)) {
+        showToast('Extension already added');
+        return;
+      }
+      box.value = current ? `${current}\n${url}` : url;
+      playBeep(580, 0.05);
+    }
+
+    function handleJsExtensionFileChosen(input) {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        pendingJsExtensionText = String(reader.result || '');
+        pendingJsExtensionName = file.name;
+        const lbl = document.getElementById('sb3JsFileLabel');
+        if (lbl) {
+          lbl.textContent = `✓ Attached: ${file.name}`;
+          lbl.style.color = '#fde047';
+        }
+        showToast(`Attached ${file.name}`);
+      };
+      reader.readAsText(file);
+    }
+
+    function normalizeExtensionUrl(rawUrl) {
+      let cleaned = String(rawUrl || '').trim();
+      // Auto-convert standard GitHub blob links into raw.githubusercontent.com JS links
+      const ghBlobMatch = cleaned.match(/^https?:\/\/github\.com\/([^/]+)\/([^/]+)\/blob\/(.+)$/i);
+      if (ghBlobMatch) {
+        cleaned = `https://raw.githubusercontent.com/${ghBlobMatch[1]}/${ghBlobMatch[2]}/${ghBlobMatch[3]}`;
+      }
+      try {
+        const u = new URL(cleaned);
+        if (u.protocol === 'https:' || u.protocol === 'blob:' || (u.protocol === 'http:' && u.hostname === 'localhost')) {
+          return u.href;
+        }
+      } catch (e) {
+        return null;
+      }
+      return null;
+    }
+
+    function parseTurboWarpExtensionEntries(rawText) {
+      const text = String(rawText || '').trim();
+      const urls = [];
+      const inlineScripts = [];
+
+      if (!text) {
+        return { urls, inlineScripts };
+      }
+
+      // Detect if the user pasted raw JavaScript extension source code directly
+      const looksLikeRawJs = /(?:Scratch\.extensions\.register|class\s+\w+|function\s*\(|=>\s*\{|getInfo\s*\(\s*\))/.test(text)
+        && !/^https?:\/\//i.test(text);
+
+      if (looksLikeRawJs) {
+        inlineScripts.push({ name: 'pasted-extension.js', code: text });
+        return { urls, inlineScripts };
+      }
+
+      text.split(/[\n,]+/).forEach((line) => {
+        const normalized = normalizeExtensionUrl(line);
+        if (normalized) {
+          urls.push(normalized);
+        }
+      });
+
+      return { urls, inlineScripts };
+    }
+
+    async function handleSb3Submit(e) {
+      e.preventDefault();
+      if (!pendingSb3File) {
+        showToast('Please choose a .sb3 file from your computer first');
+        return;
+      }
+
+      const rawTitle = document.getElementById('sb3TitleInput').value.trim() || pendingSb3File.name.replace(/\.(sb3|sb2)$/i, '');
+      const w = Math.max(240, Math.min(1920, parseInt(document.getElementById('sb3WidthInput').value, 10) || 640));
+      const h = Math.max(180, Math.min(1080, parseInt(document.getElementById('sb3HeightInput').value, 10) || 480));
+
+      const parsedExt = parseTurboWarpExtensionEntries(document.getElementById('sb3ExtensionUrls')?.value || '');
+      if (pendingJsExtensionText.trim()) {
+        parsedExt.inlineScripts.push({
+          name: pendingJsExtensionName || 'custom-extension.js',
+          code: pendingJsExtensionText
+        });
+      }
+
+      const id = 'sb3-' + Date.now();
+      const buffer = await pendingSb3File.arrayBuffer();
+      await sb3Vault.saveFile(id, buffer, pendingSb3File.name);
+
+      const extCount = parsedExt.urls.length + parsedExt.inlineScripts.length;
+      const newProj = {
+        id: id,
+        title: rawTitle.toUpperCase(),
+        subtitle: extCount > 0
+          ? `Private .sb3 • ${extCount} TurboWarp ext${extCount > 1 ? 's' : ''}`
+          : `Private .sb3 (${pendingSb3File.name})`,
+        fileName: pendingSb3File.name,
+        stageW: w,
+        stageH: h,
+        extensionUrls: parsedExt.urls,
+        inlineExtensions: parsedExt.inlineScripts,
+        isScratch: true,
+        isPrivateSb3: true,
+        isCustom: true
+      };
+
+      scratchProjects.unshift(newProj);
+      saveScratchProjects();
+      closeImportModal();
+      renderLibrary();
+      showToast('Private .sb3 saved locally for you!');
+      openGameModal(newProj.id);
+    }
+
+    function extractScratchId(raw) {
+      const cleaned = String(raw || '').trim();
+      if (/^\d{4,15}$/.test(cleaned)) return cleaned;
+      const match = cleaned.match(/scratch\.mit\.edu\/projects\/(\d+)/i) || cleaned.match(/turbowarp\.org\/(\d+)/i);
+      return match ? match[1] : null;
+    }
+
+    function previewExtractedId(val) {
+      const status = document.getElementById('extractedIdStatus');
+      const id = extractScratchId(val);
+      if (!val.trim()) {
+        status.textContent = 'Paste any shared Scratch link or project ID number.';
+        status.style.color = '#9ca3af';
+      } else if (id) {
+        status.textContent = '✓ Detected Scratch Project ID: ' + id;
+        status.style.color = '#fde047';
+      } else {
+        status.textContent = 'Enter a valid Scratch URL or numeric ID.';
+        status.style.color = '#f87171';
+      }
+    }
+
+    function handleUrlSubmit(e) {
+      e.preventDefault();
+      const rawUrl = document.getElementById('scratchUrlInput').value;
+      const title = document.getElementById('scratchTitleInput').value.trim();
+      const engine = document.getElementById('scratchEngineInput').value;
+      const w = Math.max(240, Math.min(1920, parseInt(document.getElementById('urlWidthInput').value, 10) || 640));
+      const h = Math.max(180, Math.min(1080, parseInt(document.getElementById('urlHeightInput').value, 10) || 480));
+
+      const scratchId = extractScratchId(rawUrl);
+      if (!scratchId) {
+        showToast('Please enter a valid Scratch URL or numeric ID');
+        return;
+      }
+
+      const newProj = {
+        id: 'scratch-' + Date.now(),
+        title: (title || ('SCRATCH #' + scratchId)).toUpperCase(),
+        subtitle: 'Imported Scratch project',
+        scratchId: scratchId,
+        engine: engine,
+        stageW: w,
+        stageH: h,
+        isScratch: true,
+        isPrivateSb3: false,
+        isCustom: true
+      };
+
+      scratchProjects.unshift(newProj);
+      saveScratchProjects();
+      closeImportModal();
+      renderLibrary();
+      showToast('Added "' + newProj.title + '"!');
+      openGameModal(newProj.id);
+    }
+
+    async function deleteScratchProject(id) {
+      const proj = scratchProjects.find((p) => p.id === id);
+      if (proj && proj.isPrivateSb3) {
+        await sb3Vault.deleteFile(id);
+      }
+      scratchProjects = scratchProjects.filter((p) => p.id !== id);
+      saveScratchProjects();
+      renderLibrary();
+      showToast('Removed project');
+    }
+
+    function getScratchEmbedUrl(scratchId, engine) {
+      return engine === 'scratch'
+        ? `https://scratch.mit.edu/projects/${scratchId}/embed`
+        : `https://turbowarp.org/${scratchId}/embed`;
+    }
+
+    // Dynamic Loader for @turbowarp/scaffolding (Native Local .sb3 Runner)
+    let scaffoldingScriptPromise = null;
+    function ensureScaffoldingLoaded() {
+      if (window.Scaffolding) return Promise.resolve(window.Scaffolding);
+      if (scaffoldingScriptPromise) return scaffoldingScriptPromise;
+
+      scaffoldingScriptPromise = new Promise((resolve, reject) => {
+        const urls = [
+          'https://cdn.jsdelivr.net/npm/@turbowarp/scaffolding@0.2.0/dist/scaffolding-min.js',
+          'https://unpkg.com/@turbowarp/scaffolding@0.2.0/dist/scaffolding-min.js'
+        ];
+
+        function tryNext(idx) {
+          if (idx >= urls.length) {
+            scaffoldingScriptPromise = null;
+            reject(new Error('Could not load Scratch VM runner'));
+            return;
+          }
+          const script = document.createElement('script');
+          script.src = urls[idx];
+          script.async = true;
+          script.onload = () => {
+            if (window.Scaffolding) resolve(window.Scaffolding);
+            else tryNext(idx + 1);
+          };
+          script.onerror = () => tryNext(idx + 1);
+          document.head.appendChild(script);
+        }
+
+        tryNext(0);
+      });
+
+      return scaffoldingScriptPromise;
+    }
+
+    function triggerScaffoldingGreenFlag() {
+      if (activeScaffolding && typeof activeScaffolding.greenFlag === 'function') {
+        activeScaffolding.greenFlag();
+        playBeep(640, 0.06);
+      }
+    }
+
+    function triggerScaffoldingStop() {
+      if (activeScaffolding && typeof activeScaffolding.stopAll === 'function') {
+        activeScaffolding.stopAll();
+        playBeep(360, 0.06);
+      }
+    }
+
+    // Build Custom Stage Size Toolbar & Save Codes Drawer HTML
+    function buildStageToolbarHtml(w, h) {
+      const is480 = w === 480 && h === 360;
+      const is640 = w === 640 && h === 480;
+      const isWide = w === 640 && h === 360;
+      const is720 = w === 720 && h === 480;
+      return `
+        <div class="stage-toolbar">
+          <div class="stage-presets">
+            <span style="font-size:11px; font-weight:700; color:#9ca3af; margin-right:2px;">Stage Size:</span>
+            <button type="button" class="size-pill ${is480 ? 'active' : ''}" onclick="applyStageDimensions(480, 360)">480×360</button>
+            <button type="button" class="size-pill ${is640 ? 'active' : ''}" onclick="applyStageDimensions(640, 480)">640×480</button>
+            <button type="button" class="size-pill ${isWide ? 'active' : ''}" onclick="applyStageDimensions(640, 360)">640×360</button>
+            <button type="button" class="size-pill ${is720 ? 'active' : ''}" onclick="applyStageDimensions(720, 480)">720×480</button>
+          </div>
+          <div style="display:flex; align-items:center; gap:5px;">
+            <input id="liveStageW" type="number" class="dim-input" value="${w}" min="240" max="1920" aria-label="Stage Width" />
+            <span style="font-size:11px; color:#9ca3af;">×</span>
+            <input id="liveStageH" type="number" class="dim-input" value="${h}" min="180" max="1080" aria-label="Stage Height" />
+            <button type="button" class="size-pill" style="background:#262932; color:#fff;" onclick="applyCustomStageFromInputs()">Apply</button>
+          </div>
+        </div>
+        <div id="saveCodesDrawer" class="save-drawer">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <span style="font-size:12px; font-weight:800; color:#fde047;">💾 Game Save Codes &amp; State Snapshots</span>
+            <span style="font-size:10.5px; color:#9ca3af;">Saved locally for this game</span>
+          </div>
+          <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px;">
+            <input id="saveCodeLabelInput" type="text" class="text-input" style="width:140px; padding:6px 9px;" placeholder="Slot Label (e.g. Level 4)" />
+            <input id="saveCodeValueInput" type="text" class="text-input" style="flex:1; min-width:160px; padding:6px 9px;" placeholder="Paste save code or note..." />
+            <button type="button" class="play-btn play-btn-sm" onclick="addGameSaveCode()">Save Code</button>
+          </div>
+          <div id="saveCodesList" style="display:flex; flex-direction:column; gap:6px; max-height:110px; overflow-y:auto;"></div>
+        </div>
+      `;
+    }
+
+    function toggleSaveDrawer() {
+      const drawer = document.getElementById('saveCodesDrawer');
+      if (!drawer) return;
+      drawer.classList.toggle('open');
+      if (drawer.classList.contains('open')) {
+        renderSaveCodesList();
+      }
+    }
+
+    function addGameSaveCode() {
+      if (!activeModalGame) return;
+      const labelEl = document.getElementById('saveCodeLabelInput');
+      const codeEl = document.getElementById('saveCodeValueInput');
+      const code = (codeEl ? codeEl.value : '').trim();
+      if (!code) {
+        showToast('Enter a save code or state note first');
+        return;
+      }
+      const label = (labelEl && labelEl.value.trim()) || ('Slot ' + ((gameSaves.scratchNotes[activeModalGame.id] || []).length + 1));
+      if (!gameSaves.scratchNotes[activeModalGame.id]) {
+        gameSaves.scratchNotes[activeModalGame.id] = [];
+      }
+      gameSaves.scratchNotes[activeModalGame.id].unshift({
+        label: label,
+        code: code,
+        updatedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      });
+      if (labelEl) labelEl.value = '';
+      if (codeEl) codeEl.value = '';
+      persistSaveData(false);
+      renderSaveCodesList();
+      showToast('Save code stored!');
+    }
+
+    function copySaveCodeText(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast('Save code copied to clipboard!');
+      } catch (e) {
+        showToast('Could not copy text');
+      }
+      document.body.removeChild(ta);
+    }
+
+    function deleteGameSaveCode(idx) {
+      if (!activeModalGame || !gameSaves.scratchNotes[activeModalGame.id]) return;
+      gameSaves.scratchNotes[activeModalGame.id].splice(idx, 1);
+      persistSaveData(false);
+      renderSaveCodesList();
+    }
+
+    function renderSaveCodesList() {
+      const listEl = document.getElementById('saveCodesList');
+      if (!listEl || !activeModalGame) return;
+      const notes = gameSaves.scratchNotes[activeModalGame.id] || [];
+      if (!notes.length) {
+        listEl.innerHTML = `<div style="font-size:11px; color:#6b7280;">No manual save codes saved for this game yet. Scratch cloud variables (☁) save automatically!</div>`;
+        return;
+      }
+      listEl.innerHTML = notes.map((item, idx) => `
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; background:#181a20; padding:6px 10px; border-radius:7px; border:1px solid rgba(255,255,255,0.06);">
+          <div style="min-width:0; flex:1;">
+            <span style="font-size:11px; font-weight:800; color:#fde047;">${escapeHtml(item.label)}</span>
+            <span style="font-size:10px; color:#6b7280; margin-left:6px;">${escapeHtml(item.updatedAt || '')}</span>
+            <div style="font-size:11px; color:#d1d5db; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-family:monospace;">${escapeHtml(item.code)}</div>
+          </div>
+          <div style="display:flex; gap:5px; flex-shrink:0;">
+            <button type="button" class="size-pill" onclick="copySaveCodeText('${escapeHtml(item.code).replace(/'/g, "\\'")}')">Copy</button>
+            <button type="button" class="size-pill" onclick="deleteGameSaveCode(${idx})">✕</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function applyCustomStageFromInputs() {
+      const wInput = document.getElementById('liveStageW');
+      const hInput = document.getElementById('liveStageH');
+      if (!wInput || !hInput) return;
+      const w = Math.max(240, Math.min(1920, parseInt(wInput.value, 10) || 640));
+      const h = Math.max(180, Math.min(1080, parseInt(hInput.value, 10) || 480));
+      applyStageDimensions(w, h);
+    }
+
+    function applyStageDimensions(w, h) {
+      activeStageW = w;
+      activeStageH = h;
+      const box = document.getElementById('activeStageBox');
+      if (box) {
+        box.style.width = w + 'px';
+        box.style.height = h + 'px';
+      }
+      const wInput = document.getElementById('liveStageW');
+      const hInput = document.getElementById('liveStageH');
+      if (wInput) wInput.value = w;
+      if (hInput) hInput.value = h;
+
+      document.querySelectorAll('.stage-presets .size-pill').forEach((btn) => {
+        btn.classList.toggle('active', btn.textContent === `${w}×${h}`);
+      });
+
+      if (activeModalGame && activeModalGame.isScratch) {
+        const proj = scratchProjects.find((p) => p.id === activeModalGame.id);
+        if (proj) {
+          proj.stageW = w;
+          proj.stageH = h;
+          saveScratchProjects();
+          renderLibrary();
+        }
+      }
+
+      if (activeScaffolding && typeof activeScaffolding.relayout === 'function') {
+        activeScaffolding.relayout();
+      }
+
+      const canvas = document.getElementById('gameCanvas');
+      if (canvas) {
+        canvas.width = w;
+        canvas.height = h;
+      }
+
+      showToast(`Stage resized to ${w} × ${h}`);
+    }
+
+    // Native Full Screen with Safe Full-Viewport Fallback
+    function toggleTheaterFullscreen() {
+      const card = document.getElementById('theaterModalCard');
+      if (!card) return;
+
+      const isNativeFs = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+      const isPseudoFs = card.classList.contains('pseudo-fullscreen');
+
+      if (isNativeFs) {
+        if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+        card.classList.remove('pseudo-fullscreen');
+        updateFullscreenBtnLabel(false);
+        return;
+      }
+
+      if (isPseudoFs) {
+        card.classList.remove('pseudo-fullscreen');
+        updateFullscreenBtnLabel(false);
+        if (activeScaffolding && typeof activeScaffolding.relayout === 'function') {
+          setTimeout(() => activeScaffolding.relayout(), 50);
+        }
+        return;
+      }
+
+      if (card.requestFullscreen) {
+        card.requestFullscreen().then(() => {
+          updateFullscreenBtnLabel(true);
+          if (activeScaffolding && typeof activeScaffolding.relayout === 'function') {
+            setTimeout(() => activeScaffolding.relayout(), 80);
+          }
+        }).catch(() => {
+          card.classList.add('pseudo-fullscreen');
+          updateFullscreenBtnLabel(true);
+          if (activeScaffolding && typeof activeScaffolding.relayout === 'function') {
+            setTimeout(() => activeScaffolding.relayout(), 80);
+          }
+        });
+      } else if (card.webkitRequestFullscreen) {
+        card.webkitRequestFullscreen();
+        updateFullscreenBtnLabel(true);
+      } else {
+        card.classList.add('pseudo-fullscreen');
+        updateFullscreenBtnLabel(true);
+      }
+    }
+
+    function updateFullscreenBtnLabel(isFs) {
+      const btn = document.getElementById('fullscreenBtn');
+      if (btn) {
+        btn.textContent = isFs ? '✕ Exit Full Screen' : '⛶ Full Screen';
+      }
+    }
+
+    document.addEventListener('fullscreenchange', () => {
+      const isFs = Boolean(document.fullscreenElement);
+      const card = document.getElementById('theaterModalCard');
+      if (!isFs && card) card.classList.remove('pseudo-fullscreen');
+      updateFullscreenBtnLabel(isFs);
+      if (activeScaffolding && typeof activeScaffolding.relayout === 'function') {
+        setTimeout(() => activeScaffolding.relayout(), 80);
+      }
+    });
+
+    function cleanupActiveGame() {
+      if (activeLoopId) {
+        cancelAnimationFrame(activeLoopId);
+        activeLoopId = null;
+      }
+      activeKeyHandlers.forEach(({ type, fn }) => window.removeEventListener(type, fn));
+      activeKeyHandlers = [];
+
+      if (activeScaffolding) {
+        try {
+          activeScaffolding.stopAll();
+        } catch (e) {
+          // Ignore
+        }
+        activeScaffolding = null;
+      }
+
+      if (activeExtensionBlobUrls.length) {
+        activeExtensionBlobUrls.forEach((blobUrl) => {
+          try {
+            URL.revokeObjectURL(blobUrl);
+          } catch (e) {
+            // Ignore
+          }
+        });
+        activeExtensionBlobUrls = [];
+      }
+    }
+
+    // Open Game / Scratch Theater Modal
+    async function openGameModal(gameId) {
+      cleanupActiveGame();
+
+      const game = getAllGames().find((g) => g.id === gameId) || builtInGames[0];
+      activeModalGame = game;
+
+      const [defW, defH] = defaultStage.split('x').map(Number);
+      activeStageW = game.stageW || defW || 640;
+      activeStageH = game.stageH || defH || 480;
+
+      document.getElementById('modalGameTitle').textContent = game.title;
+      document.getElementById('modalPrivateTag').style.display = game.isPrivateSb3 ? 'inline-block' : 'none';
+      document.getElementById('modalScaffoldingControls').style.display = game.isPrivateSb3 ? 'flex' : 'none';
+      document.getElementById('modalSaveStatus').textContent = '● Saved';
+
+      const switchWrap = document.getElementById('modalEngineSwitch');
+      const bodyEl = document.getElementById('modalBody');
+      switchWrap.innerHTML = '';
+
+      if (game.id === 'super-hoopz') {
+        const hs = gameSaves.hoopz;
+        bodyEl.innerHTML = `
+          ${buildStageToolbarHtml(activeStageW, activeStageH)}
+          <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px; font-size:12px;">
+            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+              <span style="color:#9ca3af;">Ball Skin:</span>
+              <button type="button" class="size-pill ${hs.selectedSkin === 'classic' ? 'active' : ''}" id="skinBtnClassic" onclick="selectHoopSkin('classic')">Classic</button>
+              <button type="button" class="size-pill ${hs.selectedSkin === 'gold' ? 'active' : ''}" id="skinBtnGold" onclick="selectHoopSkin('gold')">
+                ${hs.unlockedSkins.includes('gold') ? 'Gold Star' : '🔒 Gold (5 Baskets)'}
+              </button>
+              <button type="button" class="size-pill ${hs.selectedSkin === 'neon' ? 'active' : ''}" id="skinBtnNeon" onclick="selectHoopSkin('neon')">
+                ${hs.unlockedSkins.includes('neon') ? 'Neon Cyber' : '🔒 Neon (15 Baskets)'}
+              </button>
+            </div>
+            <div style="display:flex; gap:12px; font-weight:800;">
+              <span style="color:#9ca3af;">STREAK: <span id="hoopStreak" style="color:#fff;">0</span></span>
+              <span style="color:#9ca3af;">BEST: <span id="hoopBest" style="color:#fde047;">${hs.highScore}</span></span>
+              <span style="color:#facc15;">SCORE: <span id="hoopScore">0</span></span>
+            </div>
+          </div>
+          <div class="stage-outer-wrap">
+            <div id="activeStageBox" class="stage-frame-box" style="width:${activeStageW}px; height:${activeStageH}px;">
+              <canvas id="gameCanvas" style="width:100%; height:100%; display:block; cursor:crosshair;"></canvas>
+            </div>
+          </div>
+        `;
+        document.getElementById('gameModal').classList.add('open');
+        startHoopMiniGame(activeStageW, activeStageH);
+      } else if (game.id === 'battlefront-3') {
+        const bf = gameSaves.battlefront;
+        bodyEl.innerHTML = `
+          ${buildStageToolbarHtml(activeStageW, activeStageH)}
+          <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px; font-size:12px;">
+            <span style="color:#9ca3af;">Move: <strong>←/→ or Mouse</strong> • Fire Laser: <strong>Space or Click</strong></span>
+            <div style="display:flex; gap:12px; font-weight:800;">
+              <span style="color:#60a5fa;">WAVE: <span id="bfWave">${bf.highestWave}</span></span>
+              <span style="color:#9ca3af;">HIGH: <span id="bfHigh" style="color:#fde047;">${bf.highScore}</span></span>
+              <span style="color:#facc15;">SCORE: <span id="bfScore">0</span></span>
+            </div>
+          </div>
+          <div class="stage-outer-wrap">
+            <div id="activeStageBox" class="stage-frame-box" style="width:${activeStageW}px; height:${activeStageH}px;">
+              <canvas id="gameCanvas" style="width:100%; height:100%; display:block; cursor:crosshair;"></canvas>
+            </div>
+          </div>
+        `;
+        document.getElementById('gameModal').classList.add('open');
+        startBattlefrontMiniGame(activeStageW, activeStageH);
+      } else if (game.id === 'fnaf-2026') {
+        const fn = gameSaves.fnaf;
+        bodyEl.innerHTML = `
+          ${buildStageToolbarHtml(activeStageW, activeStageH)}
+          <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px; font-size:12px;">
+            <span style="color:#9ca3af;">Click <strong>LEFT DOOR</strong>, <strong>RIGHT DOOR</strong>, or <strong>FLASHLIGHT</strong> to block animatronics until 6 AM!</span>
+            <div style="display:flex; gap:12px; font-weight:800;">
+              <span style="color:#a78bfa;">NIGHT: <span id="fnafNight">${fn.currentNight}</span></span>
+              <span style="color:#4ade80;">POWER: <span id="fnafPower">100</span>%</span>
+              <span style="color:#facc15;">TIME: <span id="fnafClock">12 AM</span></span>
+            </div>
+          </div>
+          <div class="stage-outer-wrap">
+            <div id="activeStageBox" class="stage-frame-box" style="width:${activeStageW}px; height:${activeStageH}px;">
+              <canvas id="gameCanvas" style="width:100%; height:100%; display:block; cursor:pointer;"></canvas>
+            </div>
+          </div>
+        `;
+        document.getElementById('gameModal').classList.add('open');
+        startFnafMiniGame(activeStageW, activeStageH);
+      } else if (game.isPrivateSb3) {
+        const stored = await sb3Vault.getFile(game.id);
+        bodyEl.innerHTML = `
+          ${buildStageToolbarHtml(activeStageW, activeStageH)}
+          <div class="stage-outer-wrap">
+            <div id="activeStageBox" class="stage-frame-box" style="width:${activeStageW}px; height:${activeStageH}px;">
+              <div id="scaffoldingMount" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#fde047; font-size:13px; font-weight:700;">
+                Loading Scratch VM &amp; your .sb3 file...
+              </div>
+            </div>
+          </div>
+          <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; margin-top:10px; font-size:11px; color:#9ca3af;">
+            <span>🔒 Private Local File: <strong style="color:#fde047;">${escapeHtml(game.fileName || 'project.sb3')}</strong> • Cloud variables (☁) auto-save locally</span>
+            <div style="display:flex; gap:6px;">
+              ${stored ? `<button type="button" class="size-pill" onclick="downloadPrivateSb3('${game.id}')">⬇ Export .sb3</button>` : ''}
+            </div>
+          </div>
+        `;
+        document.getElementById('gameModal').classList.add('open');
+
+        if (stored && stored.buffer) {
+          await mountLocalSb3Scaffolding(
+            game.id,
+            stored.buffer,
+            activeStageW,
+            activeStageH,
+            game.extensionUrls || [],
+            game.inlineExtensions || []
+          );
+        } else {
+          const mount = document.getElementById('scaffoldingMount');
+          if (mount) {
+            mount.innerHTML = `<div style="padding:20px; text-align:center; color:#f87171;">Local .sb3 binary data was not found. Please re-upload your .sb3 file.</div>`;
+          }
+        }
+      } else if (game.isScratch) {
+        const activeEngine = game.engine || defaultEngine;
+        switchWrap.innerHTML = `
+          <button type="button" class="modal-close-btn" style="${activeEngine === 'turbowarp' ? 'background:#facc15;color:#111214;' : ''}" onclick="switchEmbedEngine('${game.id}', 'turbowarp')">TurboWarp</button>
+          <button type="button" class="modal-close-btn" style="${activeEngine === 'scratch' ? 'background:#facc15;color:#111214;' : ''}" onclick="switchEmbedEngine('${game.id}', 'scratch')">Scratch</button>
+        `;
+        bodyEl.innerHTML = `
+          ${buildStageToolbarHtml(activeStageW, activeStageH)}
+          <div class="stage-outer-wrap">
+            <div id="activeStageBox" class="stage-frame-box" style="width:${activeStageW}px; height:${activeStageH}px;">
+              <iframe
+                id="scratchStageFrame"
+                src="${getScratchEmbedUrl(game.scratchId, activeEngine)}"
+                allowtransparency="true"
+                frameborder="0"
+                scrolling="no"
+                allowfullscreen
+                style="width:100%; height:100%; border:0;"
+              ></iframe>
+            </div>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; font-size:11px; color:#9ca3af;">
+            <span>Scratch Project ID: <strong style="color:#fff;">${escapeHtml(game.scratchId)}</strong> • Cloud variables (☁) &amp; Save Codes persist locally</span>
+            <a href="https://scratch.mit.edu/projects/${encodeURIComponent(game.scratchId)}/" target="_blank" rel="noopener noreferrer" style="color:#facc15; text-decoration:none; font-weight:700;">Open on Scratch ↗</a>
+          </div>
+        `;
+        document.getElementById('gameModal').classList.add('open');
+      }
+
+      playBeep(520, 0.08);
+    }
+
+    // Mount Local .sb3 Directly Using @turbowarp/scaffolding + Cloud LocalStorage Persistence
+    async function mountLocalSb3Scaffolding(
+      projectId,
+      arrayBuffer,
+      stageWidth = activeStageW,
+      stageHeight = activeStageH,
+      extensionUrls = [],
+      inlineExtensions = []
+    ) {
+      const mount = document.getElementById('scaffoldingMount');
+      if (!mount) return;
+
+      try {
+        const Scaffolding = await ensureScaffoldingLoaded();
+        mount.innerHTML = '';
+
+        const scaffolding = new Scaffolding.Scaffolding();
+        scaffolding.width = stageWidth;
+        scaffolding.height = stageHeight;
+        scaffolding.resizeMode = 'preserve-ratio';
+        scaffolding.editableLists = false;
+        // Disable packagedRuntime so external and custom Blob extensions are allowed to register
+        scaffolding.usePackagedRuntime = false;
+        scaffolding.setup();
+
+        // Allow unsandboxed TurboWarp extensions (Gamepad, Pen+, Box2D, WebGL, Fetch, etc.)
+        if (scaffolding.vm && scaffolding.vm.securityManager) {
+          scaffolding.vm.securityManager.getSandboxMode = () => 'unsandboxed';
+          scaffolding.vm.securityManager.canLoadExtensionFromProject = () => true;
+        }
+
+        // Enable persistent localStorage Cloud Variables per-project!
+        if (Scaffolding.Cloud && Scaffolding.Cloud.LocalStorageProvider) {
+          const cloudKey = `allstar_arcade_cloud_${projectId}`;
+          scaffolding.addCloudProvider(new Scaffolding.Cloud.LocalStorageProvider(cloudKey));
+        }
+
+        scaffolding.appendTo(mount);
+        activeScaffolding = scaffolding;
+
+        // Build full list of extension URLs (converting local .js code into Blob URLs)
+        const allExtSources = [];
+        (Array.isArray(extensionUrls) ? extensionUrls : []).forEach((u) => {
+          const norm = normalizeExtensionUrl(u);
+          if (norm) allExtSources.push({ label: norm, url: norm });
+        });
+        (Array.isArray(inlineExtensions) ? inlineExtensions : []).forEach((ext) => {
+          if (ext && ext.code) {
+            const blob = new Blob([ext.code], { type: 'application/javascript' });
+            const blobUrl = URL.createObjectURL(blob);
+            activeExtensionBlobUrls.push(blobUrl);
+            allExtSources.push({ label: ext.name || 'custom.js', url: blobUrl });
+          }
+        });
+
+        let loadedExtCount = 0;
+        let failedExtCount = 0;
+        for (const extItem of allExtSources) {
+          try {
+            await scaffolding.vm.extensionManager.loadExtensionURL(extItem.url);
+            loadedExtCount++;
+          } catch (extensionError) {
+            failedExtCount++;
+            console.warn('Could not load TurboWarp extension:', extItem.label, extensionError);
+          }
+        }
+
+        await scaffolding.loadProject(arrayBuffer);
+        scaffolding.greenFlag();
+
+        if (failedExtCount > 0) {
+          showToast(`Loaded .sb3 (${loadedExtCount} ext ok, ${failedExtCount} blocked by CORS)`);
+        } else if (loadedExtCount > 0) {
+          showToast(`Loaded .sb3 + ${loadedExtCount} TurboWarp extension${loadedExtCount > 1 ? 's' : ''}!`);
+        } else {
+          showToast('Loaded .sb3 project with local cloud save!');
+        }
+      } catch (err) {
+        mount.innerHTML = `
+          <div style="padding:22px; text-align:center; max-width:420px;">
+            <div style="font-size:14px; font-weight:800; color:#fde047; margin-bottom:8px;">Sandbox Script Restriction Detected</div>
+            <p style="font-size:12px; color:#cbd5e1; line-height:1.5; margin-bottom:14px;">
+              Your preview environment blocked loading external VM scripts. You can still export your saved .sb3 file or open TurboWarp Packager directly.
+            </p>
+            <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+              <button type="button" class="play-btn play-btn-sm" onclick="downloadPrivateSb3('${projectId}')">⬇ Download Saved .sb3</button>
+              <a href="https://packager.turbowarp.org/" target="_blank" rel="noopener noreferrer" class="secondary-btn-sm" style="text-decoration:none;">Open TurboWarp Packager ↗</a>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    async function downloadPrivateSb3(id) {
+      const stored = await sb3Vault.getFile(id);
+      if (!stored || !stored.buffer) return;
+      const blob = new Blob([stored.buffer], { type: 'application/x.scratch.sb3' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = stored.name || 'project.sb3';
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function switchEmbedEngine(gameId, engine) {
+      const proj = scratchProjects.find((p) => p.id === gameId);
+      if (proj) {
+        proj.engine = engine;
+        saveScratchProjects();
+      }
+      openGameModal(gameId);
+    }
+
+    function closeGameModal() {
+      const card = document.getElementById('theaterModalCard');
+      if (card) card.classList.remove('pseudo-fullscreen');
+      if (document.fullscreenElement && document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      }
+      updateFullscreenBtnLabel(false);
+
+      cleanupActiveGame();
+      document.getElementById('gameModal').classList.remove('open');
+      document.getElementById('modalBody').innerHTML = '';
+      activeModalGame = null;
+    }
+
+    // =========================================================
+    // GAME 1: SUPER HOOPZ 2.0 (Persistent High Score, Streak, Skins)
+    // =========================================================
+    function selectHoopSkin(skin) {
+      const hs = gameSaves.hoopz;
+      if (!hs.unlockedSkins.includes(skin)) {
+        showToast(skin === 'gold' ? 'Score 5 total baskets to unlock Gold Star!' : 'Score 15 total baskets to unlock Neon Cyber!');
+        return;
+      }
+      hs.selectedSkin = skin;
+      persistSaveData(false);
+      ['classic', 'gold', 'neon'].forEach((s) => {
+        const btn = document.getElementById('skinBtn' + s.charAt(0).toUpperCase() + s.slice(1));
+        if (btn) btn.classList.toggle('active', s === skin);
+      });
+      showToast('Equipped ' + skin.toUpperCase() + ' basketball!');
+    }
+
+    function startHoopMiniGame(initW, initH) {
+      const canvas = document.getElementById('gameCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      canvas.width = initW || 640;
+      canvas.height = initH || 480;
+
+      let score = 0;
+      let streak = 0;
+      const ball = { x: 95, y: canvas.height - 46, vx: 0, vy: 0, r: 16, active: false, scored: false };
+
+      function resetBall() {
+        if (ball.active && !ball.scored) {
+          streak = 0;
+          const stEl = document.getElementById('hoopStreak');
+          if (stEl) stEl.textContent = '0';
+        }
+        ball.x = 95;
+        ball.y = canvas.height - 46;
+        ball.vx = 0;
+        ball.vy = 0;
+        ball.active = false;
+        ball.scored = false;
+      }
+
+      canvas.addEventListener('click', (e) => {
+        if (ball.active) return;
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const tx = (e.clientX - rect.left) * scaleX;
+        const ty = (e.clientY - rect.top) * scaleY;
+        ball.vx = Math.max(4, Math.min(15, (tx - ball.x) * 0.042));
+        ball.vy = Math.max(-19, Math.min(-7, (ty - ball.y) * 0.055));
+        ball.active = true;
+        playBeep(360, 0.06);
+      });
+
+      function loop() {
+        const w = canvas.width;
+        const h = canvas.height;
+        const rim = { x: w - 125, y: Math.round(h * 0.36), w: 58 };
+
+        ctx.clearRect(0, 0, w, h);
+
+        // Arena Backdrop
+        ctx.fillStyle = '#12151e';
+        ctx.fillRect(0, 0, w, h);
+
+        // Court Floor
+        ctx.fillStyle = '#231c16';
+        ctx.fillRect(0, h - 26, w, 26);
+        ctx.strokeStyle = '#facc15';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(0, h - 26);
+        ctx.lineTo(w, h - 26);
+        ctx.stroke();
+
+        // Backboard, Net & Rim
+        ctx.fillStyle = '#e2e8f0';
+        ctx.fillRect(rim.x + rim.w, rim.y - 52, 8, 72);
+        ctx.strokeStyle = 'rgba(255,255,255,0.45)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(rim.x + 6, rim.y);
+        ctx.lineTo(rim.x + 14, rim.y + 34);
+        ctx.lineTo(rim.x + rim.w - 14, rim.y + 34);
+        ctx.lineTo(rim.x + rim.w - 6, rim.y);
+        ctx.stroke();
+
+        ctx.strokeStyle = '#ea580c';
+        ctx.lineWidth = 5.5;
+        ctx.beginPath();
+        ctx.moveTo(rim.x, rim.y);
+        ctx.lineTo(rim.x + rim.w, rim.y);
+        ctx.stroke();
+
+        // Physics
+        if (ball.active) {
+          ball.vy += 0.38;
+          ball.x += ball.vx;
+          ball.y += ball.vy;
+
+          if (!ball.scored && ball.vy > 0 && ball.x > rim.x + 6 && ball.x < rim.x + rim.w - 6 && Math.abs(ball.y - rim.y) < 13) {
+            ball.scored = true;
+            streak += 1;
+            const pts = streak >= 3 ? 3 : 2;
+            score += pts;
+
+            const hs = gameSaves.hoopz;
+            hs.totalBaskets += 1;
+            if (score > hs.highScore) hs.highScore = score;
+            if (streak > hs.bestStreak) hs.bestStreak = streak;
+            if (hs.totalBaskets >= 5 && !hs.unlockedSkins.includes('gold')) {
+              hs.unlockedSkins.push('gold');
+              const gBtn = document.getElementById('skinBtnGold');
+              if (gBtn) gBtn.textContent = 'Gold Star';
+              showToast('Unlocked Gold Star Basketball!');
+            }
+            if (hs.totalBaskets >= 15 && !hs.unlockedSkins.includes('neon')) {
+              hs.unlockedSkins.push('neon');
+              const nBtn = document.getElementById('skinBtnNeon');
+              if (nBtn) nBtn.textContent = 'Neon Cyber';
+              showToast('Unlocked Neon Cyber Basketball!');
+            }
+            persistSaveData(false);
+
+            const scoreEl = document.getElementById('hoopScore');
+            const stEl = document.getElementById('hoopStreak');
+            const bestEl = document.getElementById('hoopBest');
+            if (scoreEl) scoreEl.textContent = String(score);
+            if (stEl) stEl.textContent = String(streak);
+            if (bestEl) bestEl.textContent = String(hs.highScore);
+            playBeep(780, 0.14);
+          }
+
+          if (ball.y > h + 28 || ball.x > w + 28) {
+            resetBall();
+          }
+        } else {
+          ball.y = h - 46;
+        }
+
+        // Basketball Skin Rendering
+        const skin = gameSaves.hoopz.selectedSkin;
+        ctx.fillStyle = skin === 'gold' ? '#facc15' : (skin === 'neon' ? '#22d3ee' : '#ea580c');
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = skin === 'neon' ? '#0f172a' : '#291408';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        activeLoopId = requestAnimationFrame(loop);
+      }
+
+      loop();
+    }
+
+    // =========================================================
+    // GAME 2: STAR WARS BATTLEFRONT III (Persistent Wave & High Score)
+    // =========================================================
+    function startBattlefrontMiniGame(initW, initH) {
+      const canvas = document.getElementById('gameCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      canvas.width = initW || 640;
+      canvas.height = initH || 480;
+
+      let score = 0;
+      let wave = gameSaves.battlefront.highestWave || 1;
+      let playerX = canvas.width / 2;
+      const lasers = [];
+      const enemies = [];
+      const keys = {};
+
+      function spawnWave(wNum) {
+        enemies.length = 0;
+        const count = Math.min(10, 4 + wNum);
+        for (let i = 0; i < count; i++) {
+          enemies.push({
+            x: 60 + ((i * (canvas.width - 120)) / Math.max(1, count - 1)),
+            y: 45 + (i % 2) * 38,
+            dir: i % 2 === 0 ? 1 : -1,
+            hp: 1
+          });
+        }
+      }
+      spawnWave(wave);
+
+      function fireLaser() {
+        lasers.push({ x: playerX, y: canvas.height - 44, vy: -10 });
+        playBeep(880, 0.05);
+      }
+
+      const onKeyDown = (e) => {
+        keys[e.code] = true;
+        if (e.code === 'Space') {
+          e.preventDefault();
+          fireLaser();
+        }
+      };
+      const onKeyUp = (e) => { keys[e.code] = false; };
+      window.addEventListener('keydown', onKeyDown);
+      window.addEventListener('keyup', onKeyUp);
+      activeKeyHandlers.push({ type: 'keydown', fn: onKeyDown }, { type: 'keyup', fn: onKeyUp });
+
+      canvas.addEventListener('mousemove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        playerX = ((e.clientX - rect.left) / rect.width) * canvas.width;
+      });
+      canvas.addEventListener('click', fireLaser);
+
+      function loop() {
+        const w = canvas.width;
+        const h = canvas.height;
+
+        if (keys['ArrowLeft'] || keys['KeyA']) playerX -= 6;
+        if (keys['ArrowRight'] || keys['KeyD']) playerX += 6;
+        playerX = Math.max(26, Math.min(w - 26, playerX));
+
+        ctx.fillStyle = '#07090f';
+        ctx.fillRect(0, 0, w, h);
+
+        // Starfield
+        ctx.fillStyle = 'rgba(255,255,255,0.45)';
+        for (let s = 0; s < 28; s++) {
+          ctx.fillRect((s * 97) % w, (s * 53 + Math.floor(performance.now() * 0.04)) % h, 2, 2);
+        }
+
+        // Lasers
+        for (let i = lasers.length - 1; i >= 0; i--) {
+          const l = lasers[i];
+          l.y += l.vy;
+          ctx.fillStyle = '#60a5fa';
+          ctx.fillRect(l.x - 2, l.y - 12, 4, 16);
+          if (l.y < -20) lasers.splice(i, 1);
+        }
+
+        // Enemies
+        const speed = 1.6 + wave * 0.35;
+        for (let j = enemies.length - 1; j >= 0; j--) {
+          const en = enemies[j];
+          en.x += en.dir * speed;
+          if (en.x < 30 || en.x > w - 30) {
+            en.dir *= -1;
+            en.y += 14;
+          }
+          if (en.y > h - 60) {
+            en.y = 48;
+          }
+
+          // TIE Fighter Silhouette
+          ctx.strokeStyle = '#f87171';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.arc(en.x, en.y, 10, 0, Math.PI * 2);
+          ctx.moveTo(en.x - 16, en.y - 14);
+          ctx.lineTo(en.x - 16, en.y + 14);
+          ctx.moveTo(en.x + 16, en.y - 14);
+          ctx.lineTo(en.x + 16, en.y + 14);
+          ctx.stroke();
+
+          // Collision
+          for (let i = lasers.length - 1; i >= 0; i--) {
+            if (Math.hypot(lasers[i].x - en.x, lasers[i].y - en.y) < 18) {
+              lasers.splice(i, 1);
+              enemies.splice(j, 1);
+              score += 100;
+              gameSaves.battlefront.shipsDefeated += 1;
+              if (score > gameSaves.battlefront.highScore) {
+                gameSaves.battlefront.highScore = score;
+              }
+              persistSaveData(false);
+              const scEl = document.getElementById('bfScore');
+              const hiEl = document.getElementById('bfHigh');
+              if (scEl) scEl.textContent = String(score);
+              if (hiEl) hiEl.textContent = String(gameSaves.battlefront.highScore);
+              playBeep(320, 0.08);
+              break;
+            }
+          }
+        }
+
+        if (!enemies.length) {
+          wave += 1;
+          if (wave > gameSaves.battlefront.highestWave) {
+            gameSaves.battlefront.highestWave = wave;
+          }
+          persistSaveData(false);
+          const wEl = document.getElementById('bfWave');
+          if (wEl) wEl.textContent = String(wave);
+          spawnWave(wave);
+          showToast('Wave ' + wave + ' cleared & saved!');
+        }
+
+        // Player Starfighter
+        ctx.fillStyle = '#facc15';
+        ctx.beginPath();
+        ctx.moveTo(playerX, h - 46);
+        ctx.lineTo(playerX - 18, h - 18);
+        ctx.lineTo(playerX + 18, h - 18);
+        ctx.closePath();
+        ctx.fill();
+
+        activeLoopId = requestAnimationFrame(loop);
+      }
+
+      loop();
+    }
+
+    // =========================================================
+    // GAME 3: FNAF 2026 (Persistent Night Progression & Survival Save)
+    // =========================================================
+    function startFnafMiniGame(initW, initH) {
+      const canvas = document.getElementById('gameCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      canvas.width = initW || 640;
+      canvas.height = initH || 480;
+
+      let power = 100;
+      let elapsedSec = 0;
+      let leftDoorClosed = false;
+      let rightDoorClosed = false;
+      let flashOn = false;
+      let leftThreat = 0.15;
+      let rightThreat = 0.1;
+      let gameOver = false;
+      let lastTick = performance.now();
+
+      canvas.addEventListener('click', (e) => {
+        if (gameOver) {
+          power = 100;
+          elapsedSec = 0;
+          leftDoorClosed = false;
+          rightDoorClosed = false;
+          leftThreat = 0.15;
+          rightThreat = 0.1;
+          gameOver = false;
+          lastTick = performance.now();
+          return;
+        }
+        const rect = canvas.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width) * canvas.width;
+        if (x < canvas.width * 0.33) {
+          leftDoorClosed = !leftDoorClosed;
+          playBeep(260, 0.07);
+        } else if (x > canvas.width * 0.67) {
+          rightDoorClosed = !rightDoorClosed;
+          playBeep(260, 0.07);
+        } else {
+          flashOn = true;
+          leftThreat = Math.max(0, leftThreat - 0.25);
+          rightThreat = Math.max(0, rightThreat - 0.25);
+          playBeep(720, 0.05);
+          setTimeout(() => { flashOn = false; }, 180);
+        }
+      });
+
+      function loop(now) {
+        const dt = Math.min(0.1, (now - lastTick) / 1000);
+        lastTick = now;
+
+        const w = canvas.width;
+        const h = canvas.height;
+        const night = gameSaves.fnaf.currentNight || 1;
+
+        if (!gameOver) {
+          elapsedSec += dt;
+          const drain = (0.9 + (leftDoorClosed ? 1.8 : 0) + (rightDoorClosed ? 1.8 : 0)) * dt;
+          power = Math.max(0, power - drain);
+
+          const aggro = (0.045 + night * 0.015) * dt;
+          if (!leftDoorClosed) leftThreat += aggro;
+          else leftThreat = Math.max(0, leftThreat - 0.18 * dt);
+
+          if (!rightDoorClosed) rightThreat += aggro * 0.9;
+          else rightThreat = Math.max(0, rightThreat - 0.18 * dt);
+
+          const hour = Math.floor(elapsedSec / 6);
+          const clockLabel = hour === 0 ? '12 AM' : `${hour} AM`;
+          const pEl = document.getElementById('fnafPower');
+          const cEl = document.getElementById('fnafClock');
+          if (pEl) pEl.textContent = String(Math.ceil(power));
+          if (cEl) cEl.textContent = clockLabel;
+
+          if (hour >= 6) {
+            gameOver = true;
+            gameSaves.fnaf.currentNight = night + 1;
+            gameSaves.fnaf.nightsSurvived += 1;
+            if (Math.round(elapsedSec) > gameSaves.fnaf.bestSurvivalSec) {
+              gameSaves.fnaf.bestSurvivalSec = Math.round(elapsedSec);
+            }
+            persistSaveData(false);
+            const nEl = document.getElementById('fnafNight');
+            if (nEl) nEl.textContent = String(gameSaves.fnaf.currentNight);
+            showToast(`6:00 AM! Night ${night} Survived & Saved!`);
+          } else if (power <= 0 || leftThreat >= 1 || rightThreat >= 1) {
+            gameOver = true;
+            if (Math.round(elapsedSec) > gameSaves.fnaf.bestSurvivalSec) {
+              gameSaves.fnaf.bestSurvivalSec = Math.round(elapsedSec);
+              persistSaveData(false);
+            }
+            playBeep(140, 0.25);
+          }
+        }
+
+        // Security Room Rendering
+        ctx.fillStyle = flashOn ? '#1e293b' : '#080a0f';
+        ctx.fillRect(0, 0, w, h);
+
+        // Left & Right Doorways
+        ctx.fillStyle = leftDoorClosed ? '#facc15' : '#111827';
+        ctx.fillRect(18, 40, w * 0.24, h - 80);
+        ctx.fillStyle = rightDoorClosed ? '#facc15' : '#111827';
+        ctx.fillRect(w - 18 - w * 0.24, 40, w * 0.24, h - 80);
+
+        // Animatronic Eyes when Threat High
+        if (!leftDoorClosed && leftThreat > 0.45) {
+          ctx.fillStyle = '#e0f2fe';
+          ctx.beginPath();
+          ctx.arc(18 + w * 0.1, h * 0.45, 4, 0, Math.PI * 2);
+          ctx.arc(18 + w * 0.14, h * 0.45, 4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        if (!rightDoorClosed && rightThreat > 0.45) {
+          ctx.fillStyle = '#e0f2fe';
+          ctx.beginPath();
+          ctx.arc(w - 18 - w * 0.14, h * 0.45, 4, 0, Math.PI * 2);
+          ctx.arc(w - 18 - w * 0.1, h * 0.45, 4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Labels
+        ctx.fillStyle = leftDoorClosed ? '#111215' : '#ffffff';
+        ctx.font = 'bold 13px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(leftDoorClosed ? 'LEFT CLOSED' : 'LEFT DOOR', 18 + w * 0.12, h / 2);
+
+        ctx.fillStyle = rightDoorClosed ? '#111215' : '#ffffff';
+        ctx.fillText(rightDoorClosed ? 'RIGHT CLOSED' : 'RIGHT DOOR', w - 18 - w * 0.12, h / 2);
+
+        ctx.fillStyle = '#fde047';
+        ctx.fillText('CENTER: FLASHLIGHT', w / 2, h / 2);
+
+        if (gameOver) {
+          ctx.fillStyle = 'rgba(0,0,0,0.78)';
+          ctx.fillRect(0, 0, w, h);
+          ctx.fillStyle = '#facc15';
+          ctx.font = 'bold 22px sans-serif';
+          ctx.fillText(Math.floor(elapsedSec / 6) >= 6 ? '6:00 AM — SHIFT COMPLETE!' : 'POWER OUT / BREACH!', w / 2, h / 2 - 12);
+          ctx.fillStyle = '#ffffff';
+          ctx.font = '13px sans-serif';
+          ctx.fillText('Progress Saved • Click anywhere to play next shift', w / 2, h / 2 + 18);
+        }
+
+        activeLoopId = requestAnimationFrame(loop);
+      }
+
+      activeLoopId = requestAnimationFrame(loop);
+    }
+
+    // Audio & Toast Utilities
+    function playBeep(freq, dur) {
+      if (!soundEnabled) return;
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.05, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + dur);
+      } catch (e) {
+        // Ignore audio restrictions
+      }
+    }
+
+    let toastTimer = null;
+    function showToast(msg) {
+      const box = document.getElementById('toastBox');
+      if (!box) return;
+      box.textContent = msg;
+      box.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => box.classList.remove('show'), 2400);
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // Initialize on load
+    (function init() {
+      const engineSelect = document.getElementById('defaultEngineSelect');
+      if (engineSelect) engineSelect.value = defaultEngine;
+      const stageSelect = document.getElementById('defaultStageSelect');
+      if (stageSelect) stageSelect.value = defaultStage;
+      setBackgroundTheme(currentTheme, true);
+      refreshHomeBadges();
+      renderLibrary();
+      renderSettingsSaveSummary();
+    })();
+  </script>
+</body>
+</html>
